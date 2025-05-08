@@ -48,6 +48,12 @@ class DBHelper {
     // return await _db?.insert(_tableName, task!.toJson())??1;
   }
 
+  static Future<List<Map<String, dynamic>>> query() async {
+    print("query function called");
+    return await _db!.query(_tableName);
+  }
+
+// ham xoa tasks
   // static Future<void> dropTable() async {
   //   if (_db == null) return;
   //   await _db!.execute("DROP TABLE IF EXISTS $_tableName");
