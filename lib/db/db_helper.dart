@@ -53,6 +53,11 @@ class DBHelper {
     return await _db!.query(_tableName);
   }
 
+  static delete (Task task) async{
+   return await _db!.delete(_tableName, where: 'id=?', whereArgs: [task.id]);
+
+  }
+
 // ham xoa tasks
   // static Future<void> dropTable() async {
   //   if (_db == null) return;
