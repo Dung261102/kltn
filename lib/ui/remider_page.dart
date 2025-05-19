@@ -151,6 +151,28 @@ class _RemiderPage extends State<RemiderPage> {
   }
 
   _showBottomSheet(BuildContext context, Task task) {
+    Get.bottomSheet(
+        Container(
+          padding: const EdgeInsets.only(top: 4),
+          height: task.isCompleted==1?
+          MediaQuery.of(context).size.height*0.24:
+          MediaQuery.of(context).size.height*0.32,
+          color: Get.isDarkMode?darkGreyClr:Colors.white,
+          child: Column(
+            children: [
+              Container(
+                height: 6,
+                width: 120,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Get.isDarkMode?Colors.grey[600]:Colors.grey[300]
+                ),
+              )
+            ],
+          ),
+
+        ),
+    );
 
   }
 
