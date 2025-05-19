@@ -1,13 +1,17 @@
 import 'package:date_picker_timeline/date_picker_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:get/get.dart';
+import 'package:glucose_real_time/controllers/task_controller.dart';
 import 'package:glucose_real_time/services/theme_service.dart';
 import 'package:glucose_real_time/ui/add_task_bar.dart';
 import 'package:glucose_real_time/ui/theme.dart';
 import 'package:glucose_real_time/ui/widgets/button.dart';
+import 'package:glucose_real_time/ui/widgets/task_title.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
+import '../models/task.dart';
 import '../services/notification_services.dart';
 
 class RemiderPage extends StatefulWidget {
@@ -18,6 +22,7 @@ class RemiderPage extends StatefulWidget {
 
 class _RemiderPage extends State<RemiderPage> {
   DateTime _selectedDate = DateTime.now();
+  final _taskController = Get.put(TaskController());
   var notifyHelper;
   @override
   void initState() {
@@ -32,10 +37,18 @@ class _RemiderPage extends State<RemiderPage> {
 
   @override
   Widget build(BuildContext context) {
+    print("build method called");
     return Scaffold(
       appBar: _appBar(),
       backgroundColor: context.theme.scaffoldBackgroundColor,
-      body: Column(children: [_addTaskBar(), _addDateBar()]),
+      body: Column(
+          children: [
+            _addTaskBar(),
+            _addDateBar(),
+            SizedBox(height: 10,),
+            _showTask(),
+          ]
+      ),
     );
   }
 
@@ -91,10 +104,54 @@ class _RemiderPage extends State<RemiderPage> {
             ),
           ),
 
-          MyButton(label: "+ Add Task", onTap: () => Get.to(AddTaskPage())),
+          MyButton(label: "+ Add Task", onTap: ()async{
+            await Get.to(()=>(AddTaskPage()));
+            _taskController.getTask();
+          }
+          )
         ],
       ),
     );
+  }
+
+
+
+
+  _showTask() {
+    return Expanded(
+        child: Obx((){
+          return ListView.builder(
+            itemCount: _taskController.taskList.length,
+              itemBuilder: (_, index) {
+              print(_taskController.taskList.length);
+              return AnimationConfiguration.staggeredList(
+                  position: index,
+                  child: SlideAnimation(
+                      child: FadeInAnimation(
+                          child: Row(
+                            children: [
+                              GestureDetector(
+                                onTap: (){
+                                  _showBottomSheet(context, _taskController.taskList[index]);
+                                },
+                                child: TaskTile(_taskController.taskList[index]),
+                              )
+
+                            ],
+                          )
+                      )
+                  )
+              );
+
+
+          });
+
+        }),
+    );
+  }
+
+  _showBottomSheet(BuildContext context, Task task) {
+
   }
 
   _addDateBar() {
