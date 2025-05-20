@@ -281,7 +281,7 @@ class _RemiderPage extends State<ReminderPage> {
         child: Center(
             child: Text(
                 label,
-              style: isClose?titletyle:titletyle.copyWith(color: Colors.white),
+              style: isClose?titleStyle:titleStyle.copyWith(color: Colors.white),
             )
         ),
 

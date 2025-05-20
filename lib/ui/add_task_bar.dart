@@ -203,7 +203,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Color", style: titletyle),
+        Text("Color", style: titleStyle),
         SizedBox(height: 8.0),
         Wrap(
           children: List<Widget>.generate(3, (int index) {

@@ -23,7 +23,7 @@ class MyInputField extends StatelessWidget {
         children: [
           Text(
             title,
-            style: titletyle,
+            style: titleStyle,
           ),
 
           Container(

@@ -48,7 +48,7 @@ TextStyle get headingStyle {
   );
 }
 
-TextStyle get titletyle {
+TextStyle get titleStyle {
   return GoogleFonts.lato(
     textStyle: TextStyle(
       fontSize: 16,
