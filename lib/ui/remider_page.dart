@@ -175,6 +175,7 @@ class _RemiderPage extends State<RemiderPage> {
                   :_bottomSheetButton(
                 label: "Task Completed",
                 onTap: () {
+                  _taskController.markTaskCompleted(task.id!);
                   Get.back();
                 },
                 clr: primaryClr,
@@ -189,7 +190,6 @@ class _RemiderPage extends State<RemiderPage> {
                 label: "Delete Task",
                 onTap: () {
                   _taskController.delete(task);
-                  _taskController.getTask();
                   Get.back();
                 },
                 clr: Colors.red[300]!,
