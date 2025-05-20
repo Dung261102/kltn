@@ -154,9 +154,10 @@ class _RemiderPage extends State<RemiderPage> {
     Get.bottomSheet(
         Container(
           padding: const EdgeInsets.only(top: 4),
-          height: task.isCompleted==1?
-          MediaQuery.of(context).size.height*0.24:
-          MediaQuery.of(context).size.height*0.32,
+          height: task.isCompleted==1
+              ? MediaQuery.of(context).size.height*0.24
+              : MediaQuery.of(context).size.height*0.32,
+          width: MediaQuery.of(context).size.width, // ✅ Thêm dòng này để full chiều ngang
           color: Get.isDarkMode?darkGreyClr:Colors.white,
           child: Column(
             children: [
@@ -187,6 +188,8 @@ class _RemiderPage extends State<RemiderPage> {
               _bottomSheetButton(
                 label: "Delete Task",
                 onTap: () {
+                  _taskController.delete(task);
+                  _taskController.getTask();
                   Get.back();
                 },
                 clr: Colors.red[300]!,
