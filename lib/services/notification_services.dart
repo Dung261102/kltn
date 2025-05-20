@@ -5,6 +5,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
+import '../models/task.dart';
+
 class NotifyHelper {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin(); // Plugin thông báo
@@ -44,11 +46,12 @@ class NotifyHelper {
   }
 
   // hàm displayNotification dùng để hiển thị thông báo trong Flutter
-  displayNotification({required String title, required String body}) async {
+  Future <void> displayNotification({required String title, required String body}) async {
     print("doing test");
 
     // Cấu hình thông báo cho Android
-    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+    var androidPlatformChannelSpecifics =
+    new AndroidNotificationDetails(
       'your channel id',
       'your channel name',
       channelDescription: 'your channel description',
@@ -76,26 +79,30 @@ class NotifyHelper {
   }
 
   //hàm lên lịch thông báo với thời gian đã định -chưa được
-  // scheduledNotification() async {
-  //   await flutterLocalNotificationsPlugin.zonedSchedule(
-  //     0, // ID của thông báo
-  //     'scheduled title', // Tiêu đề
-  //     'theme changes 5 seconds ago', // Nội dung
-  //     tz.TZDateTime.now(tz.local).add(Duration(seconds: 5)), // Thời gian gửi
-  //     const NotificationDetails(
-  //       android: AndroidNotificationDetails(
-  //         'your_channel_id', // ID kênh thông báo
-  //         'your_channel_name', // Tên kênh
-  //         channelDescription: 'your channel description', // Mô tả
-  //         importance: Importance.max,
-  //         priority: Priority.high,
-  //       ),
-  //     ),
-  //     androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-  //     matchDateTimeComponents:
-  //         null, // Có thể bỏ qua hoặc dùng `DateTimeComponents.time`
-  //   );
-  // }
+  scheduledNotification(int hour, int minutes, Task task) async {
+    int newTime = minutes;
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      0, // ID của thông báo
+      'scheduled title', // Tiêu đề
+      'theme changes 5 seconds ago', // Nội dung
+
+      tz.TZDateTime.now(tz.local).add(Duration(seconds: newTime)), // Thời gian gửi
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'your_channel_id', // ID kênh thông báo
+          'your_channel_name', // Tên kênh
+          channelDescription: 'your channel description', // Mô tả
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents:
+          null, // Có thể bỏ qua hoặc dùng `DateTimeComponents.time`
+    );
+  }
+
+  
 
   // Hàm cấp quyền cho iOS
   void requestIOSPermissions() {
