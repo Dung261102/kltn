@@ -15,7 +15,7 @@ import '../models/task.dart';
 import '../services/notification_services.dart';
 
 class RemiderPage extends StatefulWidget {
-  const RemiderPage({super.key});
+  const RemiderPage({Key? key}) : super(key: key);
   @override
   _RemiderPage createState() => _RemiderPage();
 }
@@ -24,6 +24,7 @@ class _RemiderPage extends State<RemiderPage> {
   DateTime _selectedDate = DateTime.now();
   final _taskController = Get.put(TaskController());
   var notifyHelper;
+
   @override
   void initState() {
     super.initState();
@@ -122,26 +123,57 @@ class _RemiderPage extends State<RemiderPage> {
         child: Obx((){
           return ListView.builder(
             itemCount: _taskController.taskList.length,
-              itemBuilder: (_, index) {
-              print(_taskController.taskList.length);
-              return AnimationConfiguration.staggeredList(
-                  position: index,
-                  child: SlideAnimation(
-                      child: FadeInAnimation(
-                          child: Row(
-                            children: [
-                              GestureDetector(
-                                onTap: (){
-                                  _showBottomSheet(context, _taskController.taskList[index]);
-                                },
-                                child: TaskTile(_taskController.taskList[index]),
-                              )
 
-                            ],
-                          )
-                      )
-                  )
-              );
+              itemBuilder: (_, index) {
+
+              Task task = _taskController.taskList[index];
+              //print(task.toJson());
+
+              if (task.repeat=='Daily') {
+                return AnimationConfiguration.staggeredList(
+                    position: index,
+                    child: SlideAnimation(
+                        child: FadeInAnimation(
+                            child: Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: (){
+                                    _showBottomSheet(context, task);
+                                  },
+                                  child: TaskTile(task),
+                                )
+
+                              ],
+                            )
+                        )
+                    )
+                );
+
+              }
+
+              if (task.date==DateFormat.yMd().format(_selectedDate)) {
+                return AnimationConfiguration.staggeredList(
+                    position: index,
+                    child: SlideAnimation(
+                        child: FadeInAnimation(
+                            child: Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: (){
+                                    _showBottomSheet(context, task);
+                                  },
+                                  child: TaskTile(task),
+                                )
+
+                              ],
+                            )
+                        )
+                    )
+                );
+
+              } else {
+                return Container();
+              }
 
 
           });
@@ -295,7 +327,9 @@ class _RemiderPage extends State<RemiderPage> {
         ),
 
         onDateChange: (date) {
-          _selectedDate = date;
+          setState(() {
+            _selectedDate = date;
+          });
         },
       ),
     );
