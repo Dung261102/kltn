@@ -50,6 +50,7 @@ dependencies:
   permission_handler:
   flutter_native_timezone: ^2.0.0
   sqflite: ^2.4.2
+  flutter_staggered_animations:
   path:
 
 dev_dependencies:
