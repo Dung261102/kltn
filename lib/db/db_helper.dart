@@ -58,6 +58,15 @@ class DBHelper {
 
   }
 
+  static update(int id) async{
+    return await _db!.rawUpdate('''
+    UPDATE task
+    SET isCompleted = ?
+    WHERE id =?
+    
+    ''', [1, id]);
+  }
+
 // ham xoa tasks
   // static Future<void> dropTable() async {
   //   if (_db == null) return;
