@@ -14,13 +14,13 @@ import 'package:intl/intl.dart';
 import '../models/task.dart';
 import '../services/notification_services.dart';
 
-class RemiderPage extends StatefulWidget {
-  const RemiderPage({Key? key}) : super(key: key);
+class ReminderPage extends StatefulWidget {
+  const ReminderPage({Key? key}) : super(key: key);
   @override
   _RemiderPage createState() => _RemiderPage();
 }
 
-class _RemiderPage extends State<RemiderPage> {
+class _RemiderPage extends State<ReminderPage> {
   DateTime _selectedDate = DateTime.now();
   final _taskController = Get.put(TaskController());
   var notifyHelper;

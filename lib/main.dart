@@ -4,7 +4,7 @@ import 'package:get/get_navigation/src/root/get_material_app.dart';
 //màn hình Remider
 import 'package:get_storage/get_storage.dart'; // thư viện lưu trữ biến cục bộ
 import 'package:glucose_real_time/db/db_helper.dart';
-import 'package:glucose_real_time/ui/remider_page.dart'; // màn hình remider
+import 'package:glucose_real_time/ui/reminder_page.dart'; // màn hình remider
 import 'package:glucose_real_time/ui/theme.dart'; //các theme chính
 import 'package:glucose_real_time/services/theme_service.dart';
 //theme_service
@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
       //   "Details":
       //       (context) => Details(), // Thêm đường dẫn cho màn hình Details
       // },
-      home: RemiderPage(), // màn hình đầu tiên
+      home: ReminderPage(), // màn hình đầu tiên
     );
   }
 }
