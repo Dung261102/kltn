@@ -1,3 +1,5 @@
+//Chứa logic chuyển đổi giữa light/dark theme
+
 import 'package:flutter/material.dart';
 //thư viện get_storage - thư viện lưu trữ cục bộ (local storage) - sqlite
 import 'package:get_storage/get_storage.dart';
