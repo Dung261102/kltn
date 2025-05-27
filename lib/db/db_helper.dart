@@ -67,6 +67,20 @@ class DBHelper {
     ''', [1, id]);
   }
 
+  // // ✅ Hàm xóa toàn bộ task trong bảng
+  // static Future<int> deleteAll() async {
+  //   if (_db == null) throw Exception("Database not initialized");
+  //   return await _db!.delete(_tableName);
+  // }
+  //
+  // // ✅ Hàm reset lại giá trị tự tăng ID về 1
+  // static Future<void> resetTaskId() async {
+  //   if (_db == null) throw Exception("Database not initialized");
+  //   await _db!.execute("DELETE FROM sqlite_sequence WHERE name = '$_tableName'");
+  // }
+
+
+
 // ham xoa tasks
   // static Future<void> dropTable() async {
   //   if (_db == null) return;

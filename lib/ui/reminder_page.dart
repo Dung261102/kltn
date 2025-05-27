@@ -43,12 +43,12 @@ class _RemiderPage extends State<ReminderPage> {
       appBar: _appBar(),
       backgroundColor: context.theme.scaffoldBackgroundColor,
       body: Column(
-          children: [
-            _addTaskBar(),
-            _addDateBar(),
-            SizedBox(height: 10,),
-            _showTask(),
-          ]
+        children: [
+          _addTaskBar(),
+          _addDateBar(),
+          SizedBox(height: 10),
+          _showTask(),
+        ],
       ),
     );
   }
@@ -69,7 +69,7 @@ class _RemiderPage extends State<ReminderPage> {
                     : "Activated Dark Theme",
           );
 
-          notifyHelper.scheduledNotification(); //chưa sử dụng được
+          // notifyHelper.scheduledNotification(); //chưa sử dụng được
         },
         child: Icon(
           Get.isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
@@ -105,189 +105,225 @@ class _RemiderPage extends State<ReminderPage> {
             ),
           ),
 
-          MyButton(label: "+ Add Task", onTap: ()async{
-            await Get.to(()=>(AddTaskPage()));
-            _taskController.getTask();
-          }
-          )
+          MyButton(
+            label: "+ Add Task",
+            onTap: () async {
+              await Get.to(() => (AddTaskPage()));
+              _taskController.getTask();
+            },
+          ),
         ],
       ),
     );
   }
 
-
-
-
   _showTask() {
     return Expanded(
-        child: Obx((){
-          return ListView.builder(
-            itemCount: _taskController.taskList.length,
+      child: Obx(() {
+        return ListView.builder(
+          itemCount: _taskController.taskList.length,
+          itemBuilder: (_, index) {
+            Task task = _taskController.taskList[index];
+            print(task.toJson()); // Debug thông tin task
 
-              itemBuilder: (_, index) {
+            if (task.repeat == 'Daily' && task.isCompleted != 1) {
+              String cleanedTime = task.startTime.toString().trim();
+// Nếu cần, có thể dùng regex để loại bỏ ký tự không phải số, chữ, hoặc dấu hai chấm, AM/PM
+              cleanedTime = cleanedTime.replaceAll(RegExp(r'[^\d:APM ]'), '').trim();
 
-              Task task = _taskController.taskList[index];
-              //print(task.toJson());
+              // DateFormat format = DateFormat('hh:mm a'); // hh: giờ 12h, mm: phút, a: AM/PM
+              // DateTime date = format.parse(cleanedTime);
 
-              if (task.repeat=='Daily') {
-                return AnimationConfiguration.staggeredList(
-                    position: index,
-                    child: SlideAnimation(
-                        child: FadeInAnimation(
-                            child: Row(
-                              children: [
-                                GestureDetector(
-                                  onTap: (){
-                                    _showBottomSheet(context, task);
-                                  },
-                                  child: TaskTile(task),
-                                )
+              //test
+              DateTime date;
 
-                              ],
-                            )
-                        )
-                    )
-                );
-
-              }
-
-              if (task.date==DateFormat.yMd().format(_selectedDate)) {
-                return AnimationConfiguration.staggeredList(
-                    position: index,
-                    child: SlideAnimation(
-                        child: FadeInAnimation(
-                            child: Row(
-                              children: [
-                                GestureDetector(
-                                  onTap: (){
-                                    _showBottomSheet(context, task);
-                                  },
-                                  child: TaskTile(task),
-                                )
-
-                              ],
-                            )
-                        )
-                    )
-                );
-
-              } else {
-                return Container();
+              try {
+                // Thử parse với định dạng có AM/PM
+                DateFormat format = DateFormat('hh:mm a'); // hh: giờ 12h, mm: phút, a: AM/PM
+                date = format.parse(cleanedTime);
+              } catch (e) {
+                // Nếu lỗi, parse với định dạng 24h
+                DateFormat format = DateFormat('HH:mm'); // HH: giờ 24h, mm: phút
+                date = format.parse(cleanedTime);
               }
 
 
-          });
+              var myTime = DateFormat('HH:mm').format(date);
 
-        }),
+              int hour = date.hour;
+              int minutes = date.minute;
+
+
+              // print('Original startTime: "${task.startTime.toString()}"');
+              // print('Cleaned startTime: "$cleanedTime"');
+              // print('Hour: $hour, Minutes: $minutes');
+
+
+
+              // DateTime date = DateFormat.jm().parse(task.startTime.toString());
+              // var myTime = DateFormat("HH:mm").format(date);
+              print(myTime);
+              notifyHelper.scheduledNotification(hour, minutes, task);
+
+              return AnimationConfiguration.staggeredList(
+                position: index,
+                child: SlideAnimation(
+                  child: FadeInAnimation(
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            _showBottomSheet(context, task);
+                          },
+                          child: TaskTile(task),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            if (task.date == DateFormat.yMd().format(_selectedDate)) {
+              return AnimationConfiguration.staggeredList(
+                position: index,
+                child: SlideAnimation(
+                  child: FadeInAnimation(
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            _showBottomSheet(context, task);
+                          },
+                          child: TaskTile(task),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            } else {
+              return Container();
+            }
+          },
+        );
+      }),
     );
   }
 
   _showBottomSheet(BuildContext context, Task task) {
     Get.bottomSheet(
-        Container(
-          padding: const EdgeInsets.only(top: 4),
-          height: task.isCompleted==1
-              ? MediaQuery.of(context).size.height*0.24
-              : MediaQuery.of(context).size.height*0.32,
-          width: MediaQuery.of(context).size.width, // ✅ Thêm dòng này để full chiều ngang
-          color: Get.isDarkMode?darkGreyClr:Colors.white,
-          child: Column(
-            children: [
-              Container(
-                height: 6,
-                width: 120,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Get.isDarkMode?Colors.grey[600]:Colors.grey[300]
-                )
+      Container(
+        padding: const EdgeInsets.only(top: 4),
+        height:
+            task.isCompleted == 1
+                ? MediaQuery.of(context).size.height * 0.24
+                : MediaQuery.of(context).size.height * 0.32,
+        width:
+            MediaQuery.of(
+              context,
+            ).size.width, // ✅ Thêm dòng này để full chiều ngang
+        color: Get.isDarkMode ? darkGreyClr : Colors.white,
+        child: Column(
+          children: [
+            Container(
+              height: 6,
+              width: 120,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Get.isDarkMode ? Colors.grey[600] : Colors.grey[300],
               ),
-              Spacer(),
-              task.isCompleted==1
-              ?Container()
-                  :_bottomSheetButton(
-                label: "Task Completed",
-                onTap: () {
-                  _taskController.markTaskCompleted(task.id!);
-                  Get.back();
-                },
-                clr: primaryClr,
-                context: context,
-              ),
+            ),
+            Spacer(),
+            task.isCompleted == 1
+                ? Container()
+                : _bottomSheetButton(
+                  label: "Task Completed",
+                  onTap: () {
+                    _taskController.markTaskCompleted(task.id!);
+                    Get.back();
+                  },
+                  clr: primaryClr,
+                  context: context,
+                ),
+            // IconButton(
+            //   icon: Icon(Icons.delete_forever),
+            //   onPressed: () {
+            //     _taskController.deleteAllTasks();
+            //     Get.snackbar("Xóa tất cả", "Toàn bộ công việc đã được xoá",
+            //         snackPosition: SnackPosition.BOTTOM);
+            //   },
+            // ),
 
-              SizedBox(
-                height: 20,
-              ),
 
-              _bottomSheetButton(
-                label: "Delete Task",
-                onTap: () {
-                  _taskController.delete(task);
-                  Get.back();
-                },
-                clr: Colors.red[300]!,
-                context: context,
-              ),
+            SizedBox(height: 20),
 
-              SizedBox(
-                height: 20,
-              ),
-
-              _bottomSheetButton(
-                label: "Close",
-                onTap: () {
-                  Get.back();
-                },
-                clr: Colors.red[300]!,
-                context: context,
-                isClose: true,
-              ),
-              SizedBox(
-                height: 10,
-              ),
+            _bottomSheetButton(
+              label: "Delete Task",
+              onTap: () {
+                _taskController.delete(task);
+                Get.back();
+              },
+              clr: Colors.red[300]!,
+              context: context,
+            ),
 
 
 
-            ],
-          ),
 
+            SizedBox(height: 20),
+
+            _bottomSheetButton(
+              label: "Close",
+              onTap: () {
+                Get.back();
+              },
+              clr: Colors.red[300]!,
+              context: context,
+              isClose: true,
+            ),
+            SizedBox(height: 10),
+          ],
         ),
+      ),
     );
-
   }
 
   _bottomSheetButton({
     required String label,
-      required Function()? onTap,
+    required Function()? onTap,
     required Color clr,
-    bool isClose=false,
+    bool isClose = false,
     required BuildContext context,
-
-}){
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 4),
         height: 55,
-        width: MediaQuery.of(context).size.width*0.9,
+        width: MediaQuery.of(context).size.width * 0.9,
         decoration: BoxDecoration(
           border: Border.all(
             width: 2,
-            color: isClose==true?Get.isDarkMode?Colors.grey[600]!:Colors.grey[300]!:clr
+            color:
+                isClose == true
+                    ? Get.isDarkMode
+                        ? Colors.grey[600]!
+                        : Colors.grey[300]!
+                    : clr,
           ),
           borderRadius: BorderRadius.circular(20),
-          color:isClose==true?Colors.transparent:clr,
-
+          color: isClose == true ? Colors.transparent : clr,
         ),
         child: Center(
-            child: Text(
-                label,
-              style: isClose?titleStyle:titleStyle.copyWith(color: Colors.white),
-            )
+          child: Text(
+            label,
+            style:
+                isClose ? titleStyle : titleStyle.copyWith(color: Colors.white),
+          ),
         ),
-
-      )
+      ),
     );
-
   }
 
   _addDateBar() {
