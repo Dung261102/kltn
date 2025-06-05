@@ -3,16 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:get/get.dart';
 import 'package:glucose_real_time/controllers/task_controller.dart';
-import 'package:glucose_real_time/services/theme_service.dart';
-import 'package:glucose_real_time/ui/add_task_bar.dart';
-import 'package:glucose_real_time/ui/theme.dart';
 import 'package:glucose_real_time/ui/widgets/button.dart';
 import 'package:glucose_real_time/ui/widgets/task_title.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
-import '../models/task.dart';
-import '../services/notification_services.dart';
+import '../../../models/task.dart';
+import '../../../services/notification_services.dart';
+import '../../theme/theme.dart';
+import '../../widgets/common_appbar.dart';
+import 'add_task_bar.dart';
+
 
 class ReminderPage extends StatefulWidget {
   const ReminderPage({Key? key}) : super(key: key);
@@ -23,25 +24,23 @@ class ReminderPage extends StatefulWidget {
 class _RemiderPage extends State<ReminderPage> {
   DateTime _selectedDate = DateTime.now();
   final _taskController = Get.put(TaskController());
-  var notifyHelper;
+
+  // Lấy instance NotifyHelper singleton
+  final NotifyHelper notifyHelper = NotifyHelper();
 
   @override
   void initState() {
     super.initState();
-    notifyHelper = NotifyHelper();
-    notifyHelper.initializeNotification();
-    //Hàm cấp quyền cho IOS
-    notifyHelper.requestIOSPermissions();
-    //  Hàm cấp quyền cho android
-    notifyHelper.requestAndroidNotificationPermission();
   }
 
   @override
   Widget build(BuildContext context) {
     print("build method called");
     return Scaffold(
-      appBar: _appBar(),
-      backgroundColor: context.theme.scaffoldBackgroundColor,
+      appBar: CommonAppBar(
+        notifyHelper: notifyHelper,
+        // thêm code để chỉnh sửa app bar tại đây
+      ),
       body: Column(
         children: [
           _addTaskBar(),
@@ -50,38 +49,6 @@ class _RemiderPage extends State<ReminderPage> {
           _showTask(),
         ],
       ),
-    );
-  }
-
-  //thanh trên cùng
-  _appBar() {
-    return AppBar(
-      elevation: 0,
-      backgroundColor: context.theme.scaffoldBackgroundColor,
-      leading: GestureDetector(
-        onTap: () {
-          ThemeService().switchTheme();
-          notifyHelper.displayNotification(
-            title: "Theme Changed",
-            body:
-                Get.isDarkMode
-                    ? "Activated Light Theme"
-                    : "Activated Dark Theme",
-          );
-
-          // notifyHelper.scheduledNotification(); //chưa sử dụng được
-        },
-        child: Icon(
-          Get.isDarkMode ? Icons.wb_sunny_outlined : Icons.nightlight_round,
-          size: 20,
-          color: Get.isDarkMode ? Colors.white : Colors.black,
-        ),
-      ),
-      actions: [
-        CircleAvatar(backgroundImage: AssetImage("images/profile.png")),
-
-        SizedBox(width: 20),
-      ],
     );
   }
 

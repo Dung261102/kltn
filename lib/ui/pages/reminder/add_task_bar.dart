@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:glucose_real_time/controllers/task_controller.dart';
-import 'package:glucose_real_time/ui/theme.dart';
 import 'package:glucose_real_time/ui/widgets/button.dart';
 import 'package:glucose_real_time/ui/widgets/input_field.dart';
 import 'package:intl/intl.dart';
 
-import '../models/task.dart';
+import '../../../models/task.dart';
+import '../../theme/theme.dart';
+
+
 
 class AddTaskPage extends StatefulWidget {
   const AddTaskPage({Key? key}) : super(key: key);

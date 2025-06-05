@@ -4,9 +4,12 @@ import 'package:get/get_navigation/src/root/get_material_app.dart';
 //màn hình Remider
 import 'package:get_storage/get_storage.dart'; // thư viện lưu trữ biến cục bộ
 import 'package:glucose_real_time/db/db_helper.dart';
-import 'package:glucose_real_time/ui/reminder_page.dart'; // màn hình remider
-import 'package:glucose_real_time/ui/theme.dart'; //các theme chính
+import 'package:glucose_real_time/services/notification_services.dart';
+
 import 'package:glucose_real_time/services/theme_service.dart';
+
+import 'package:glucose_real_time/ui/theme/theme.dart';
+import 'package:glucose_real_time/ui/widgets/custom_bottom_navigation_bar.dart';
 //theme_service
 
 Future<void> main() async {
@@ -14,6 +17,14 @@ Future<void> main() async {
   // await DBHelper.dropTable(); // Xoá bảng 'tasks'
   await DBHelper.initDb();
   await GetStorage.init();
+
+
+  // Khởi tạo NotifyHelper
+  final notifyHelper = NotifyHelper();
+  await notifyHelper.initializeNotification();
+  notifyHelper.requestIOSPermissions();
+  notifyHelper.requestAndroidNotificationPermission();
+
   runApp(MyApp());
 }
 
@@ -32,14 +43,13 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeService().theme,
 
       // Định nghĩa routes (đường dẫn), nơi mỗi route là một màn hình
-      // routes: {
-      //   "/":
-      //       (context) =>
-      //       MainPage(), // Khi route là "/", nó sẽ điều hướng đến màn hình MainPage
-      //   "Details":
-      //       (context) => Details(), // Thêm đường dẫn cho màn hình Details
-      // },
-      home: ReminderPage(), // màn hình đầu tiên
+      routes: {
+        "/":
+            (context) =>
+                MainPage(), // Khi route là "/", nó sẽ điều hướng đến màn hình MainPage
+      },
+
+      // home: ReminderPage(), // màn hình đầu tiên
     );
   }
 }

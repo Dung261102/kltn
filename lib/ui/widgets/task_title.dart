@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:glucose_real_time/ui/theme.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/task.dart';
+import '../theme/theme.dart';
 
 
 class TaskTile extends StatelessWidget {
