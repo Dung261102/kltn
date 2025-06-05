@@ -260,16 +260,16 @@ class _AddTaskPageState extends State<AddTaskPage> {
   }
 
   _getDateFromUser() async {
-    DateTime? pickerData = await showDatePicker(
+    DateTime? _pickerData = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2024),
       lastDate: DateTime(2035),
     );
 
-    if (pickerData != null) {
+    if (_pickerData != null) {
       setState(() {
-        _selectedDate = pickerData;
+        _selectedDate = _pickerData;
         print(_selectedDate);
       });
     } else {
@@ -279,29 +279,42 @@ class _AddTaskPageState extends State<AddTaskPage> {
 
   _getTimeFromUser({required bool isStartTime}) async {
     var pickerTime = await _showTimePicker();
-    String formatedTime = pickerTime.format(context);
+    String _formatedTime = pickerTime.format(context);
     if (pickerTime == null) {
       print("Time canceld");
     } else if (isStartTime == true) {
       setState(() {
-        _startTime = formatedTime;
+        _startTime = _formatedTime;
       });
     } else if (isStartTime == false) {
       setState(() {
-        _endTime = formatedTime;
+        _endTime = _formatedTime;
       });
     }
   }
 
   _showTimePicker() {
     return showTimePicker(
-      context: context,
-      initialEntryMode: TimePickerEntryMode.dial, // <-- sửa tại đây
-      initialTime: TimeOfDay(
-        hour: int.parse(_startTime.split(":")[0]),
-        minute: int.parse(_startTime.split(":")[1].split(" ")[0]),
-      ),
+        initialEntryMode: TimePickerEntryMode.dial,
+        context: context,
+        initialTime: TimeOfDay(
+          hour: int.parse(_startTime.split(":")[0]),
+          minute: int.parse(_startTime.split(":")[1].split(" ")[0]),
+        )
     );
   }
+
+  // _showTimePicker() {
+  //   return showTimePicker(
+  //     context: context,
+  //     initialEntryMode: TimePickerEntryMode.dial, // <-- sửa tại đây
+  //     initialTime: TimeOfDay(
+  //       hour: int.parse(_startTime.split(":")[0]),
+  //       minute: int.parse(_startTime.split(":")[1].split(" ")[0]),
+  //     ),
+  //   );
+  // }
+
+
 
 }
