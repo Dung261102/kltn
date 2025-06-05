@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import '../../../services/notification_services.dart';
 import '../../widgets/LineChart.dart';
+import '../../widgets/common_appbar.dart';
 import 'homeAppBar.dart'; //widget HomeAppBar trong folder Widgets
 
 // page 1 - HomePage gồm 4 thành phần chính (appbar, line chart, 3 chỉ số, today)
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
+
+
   @override
   Widget build(BuildContext context) {
+    // Lấy instance NotifyHelper singleton
+    final NotifyHelper notifyHelper = NotifyHelper();
     // Giả sử avatarUrl là null khi người dùng chưa có ảnh đại diện
     String? avatarUrl; // avatarUrl có thể là null nếu không có ảnh người dùng
     int?
@@ -22,12 +28,17 @@ class HomePage extends StatelessWidget {
         children: [
           // 1 - HomeAppBar
           // Truyền cả tên, URL ảnh đại diện và số thông báo vào HomeAppBar
-          HomeAppBar(
-            name: 'Dung', // Tên người dùng
-            avatarUrl: avatarUrl, // URL ảnh đại diện có thể là null
-            notificationCount:
-                notificationCount ??
-                3, // Số thông báo thực tế, nếu không có thì mặc định là 3
+
+          // HomeAppBar(
+          //   name: 'Dung', // Tên người dùng
+          //   avatarUrl: avatarUrl, // URL ảnh đại diện có thể là null
+          //   notificationCount:
+          //       notificationCount ??
+          //       3, // Số thông báo thực tế, nếu không có thì mặc định là 3
+          // ),
+          CommonAppBar(
+            notifyHelper: notifyHelper,
+            // thêm code để chỉnh sửa app bar tại đây
           ),
 
 

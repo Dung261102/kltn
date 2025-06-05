@@ -5,8 +5,10 @@ import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 // Import cốt lõi của GetX (có thể không cần vì đã có gói `get.dart`)
 
 
+import '../../../services/notification_services.dart';
 import '../../theme/test/image_strings.dart';
 import '../../theme/test/text_strings.dart';
+import '../../widgets/common_appbar.dart';
 import 'UpdateProfileScreen.dart'; // Import màn hình cập nhật hồ sơ
 
 // Tạo một class `ProfilePage` kế thừa từ `StatelessWidget` để xây dựng trang hồ sơ (Profile)
@@ -15,29 +17,39 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Lấy giá trị độ sáng của thiết bị (chế độ tối hoặc sáng)
-    var isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
+
+    // Lấy instance NotifyHelper singleton
+    final NotifyHelper notifyHelper = NotifyHelper();
+
+    // // Lấy giá trị độ sáng của thiết bị (chế độ tối hoặc sáng)
+    // var isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
 
     return Scaffold( // Scaffold cung cấp cấu trúc giao diện chính cho màn hình
-      appBar: AppBar( // Thanh AppBar ở đầu trang
-        leading: IconButton( // Nút quay lại
-          onPressed: () {}, // Hành động khi nhấn nút quay lại, hiện tại chưa có logic
-          icon: const Icon(LineAwesomeIcons.angle_left_solid), // Biểu tượng nút quay lại
-        ),
-        title: Center( // Tiêu đề của AppBar nằm ở giữa
-          child: Text(
-            tProflie, // Chuỗi văn bản cho tiêu đề từ `text_strings.dart`
-            style: Theme.of(context).textTheme.headlineMedium, // Áp dụng kiểu chữ từ chủ đề của ứng dụng
-          ),
-        ),
-        actions: [
-          IconButton( // Nút để chuyển đổi giữa chế độ tối và sáng
-            onPressed: () {}, // Hành động khi nhấn vào nút (chưa có logic)
-            icon: Icon(
-              isDark ? LineAwesomeIcons.sun : LineAwesomeIcons.moon_solid, // Biểu tượng thay đổi tùy theo chế độ
-            ),
-          ),
-        ],
+
+      // appBar: AppBar( // Thanh AppBar ở đầu trang
+      //   leading: IconButton( // Nút quay lại
+      //     onPressed: () {}, // Hành động khi nhấn nút quay lại, hiện tại chưa có logic
+      //     icon: const Icon(LineAwesomeIcons.angle_left_solid), // Biểu tượng nút quay lại
+      //   ),
+      //   title: Center( // Tiêu đề của AppBar nằm ở giữa
+      //     child: Text(
+      //       tProflie, // Chuỗi văn bản cho tiêu đề từ `text_strings.dart`
+      //       style: Theme.of(context).textTheme.headlineMedium, // Áp dụng kiểu chữ từ chủ đề của ứng dụng
+      //     ),
+      //   ),
+      //   actions: [
+      //     IconButton( // Nút để chuyển đổi giữa chế độ tối và sáng
+      //       onPressed: () {}, // Hành động khi nhấn vào nút (chưa có logic)
+      //       icon: Icon(
+      //         isDark ? LineAwesomeIcons.sun : LineAwesomeIcons.moon_solid, // Biểu tượng thay đổi tùy theo chế độ
+      //       ),
+      //     ),
+      //   ],
+      // ),
+
+      appBar: CommonAppBar(
+        notifyHelper: notifyHelper,
+        // thêm code để chỉnh sửa app bar tại đây
       ),
 
       // Nội dung chính của màn hình được cuộn lại với SingleChildScrollView

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../services/notification_services.dart';
 import '../../widgets/LineChart.dart';
+import '../../widgets/common_appbar.dart';
 
 
 
@@ -13,19 +15,15 @@ class ReportPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // backgroundColor: Color(0xffE2EAFF),
-      appBar: AppBar(
-        title: Text(
-          'Report',
-          style: TextStyle(
-            fontSize: 25,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-      ),
 
+    // Lấy instance NotifyHelper singleton
+    final NotifyHelper notifyHelper = NotifyHelper();
+
+    return Scaffold(
+      appBar: CommonAppBar(
+        notifyHelper: notifyHelper,
+        // thêm code để chỉnh sửa app bar tại đây
+      ),
       body: ListView(
         children: [
           // 1 - Container bao trùm thanh ngang hiển thị ngày tháng năm
