@@ -7,7 +7,6 @@ import 'package:glucose_real_time/ui/widgets/button.dart';
 import 'package:glucose_real_time/ui/widgets/task_title.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-
 import '../../../models/task.dart';
 import '../../../services/notification_services.dart';
 import '../../theme/theme.dart';
@@ -16,12 +15,13 @@ import 'add_task_bar.dart';
 
 
 class ReminderPage extends StatefulWidget {
-  const ReminderPage({Key? key}) : super(key: key);
+  const ReminderPage({super.key}); // Sử dụng super.key (cú pháp mới)
+
   @override
-  _RemiderPage createState() => _RemiderPage();
+  State<ReminderPage> createState() => _ReminderPageState(); // Trả về State đúng chuẩn
 }
 
-class _RemiderPage extends State<ReminderPage> {
+class _ReminderPageState extends State<ReminderPage> {
   DateTime _selectedDate = DateTime.now();
   final _taskController = Get.put(TaskController());
 
@@ -35,12 +35,13 @@ class _RemiderPage extends State<ReminderPage> {
 
   @override
   Widget build(BuildContext context) {
-    print("build method called");
+    // print("build method called");
     return Scaffold(
       appBar: CommonAppBar(
         notifyHelper: notifyHelper,
         // thêm code để chỉnh sửa app bar tại đây
       ),
+
       body: Column(
         children: [
           _addTaskBar(),
@@ -80,6 +81,51 @@ class _RemiderPage extends State<ReminderPage> {
             },
           ),
         ],
+      ),
+    );
+  }
+
+  _addDateBar() {
+    return Container(
+      margin: const EdgeInsets.only(top: 20, left: 20),
+      child: DatePicker(
+        DateTime.now(),
+        height: 100,
+        width: 80,
+
+        initialSelectedDate: DateTime.now(),
+        selectionColor: primaryClr,
+        selectedTextColor: Colors.white,
+
+        dateTextStyle: GoogleFonts.lato(
+          textStyle: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey,
+          ),
+        ),
+
+        dayTextStyle: GoogleFonts.lato(
+          textStyle: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey,
+          ),
+        ),
+
+        monthTextStyle: GoogleFonts.lato(
+          textStyle: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey,
+          ),
+        ),
+
+        onDateChange: (date) {
+          setState(() {
+            _selectedDate = date;
+          });
+        },
       ),
     );
   }
@@ -293,48 +339,5 @@ class _RemiderPage extends State<ReminderPage> {
     );
   }
 
-  _addDateBar() {
-    return Container(
-      margin: const EdgeInsets.only(top: 20, left: 20),
-      child: DatePicker(
-        DateTime.now(),
-        height: 100,
-        width: 80,
 
-        initialSelectedDate: DateTime.now(),
-        selectionColor: primaryClr,
-        selectedTextColor: Colors.white,
-
-        dateTextStyle: GoogleFonts.lato(
-          textStyle: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey,
-          ),
-        ),
-
-        dayTextStyle: GoogleFonts.lato(
-          textStyle: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey,
-          ),
-        ),
-
-        monthTextStyle: GoogleFonts.lato(
-          textStyle: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey,
-          ),
-        ),
-
-        onDateChange: (date) {
-          setState(() {
-            _selectedDate = date;
-          });
-        },
-      ),
-    );
-  }
 }

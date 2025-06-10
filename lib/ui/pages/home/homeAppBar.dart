@@ -32,7 +32,7 @@ class HomeAppBar extends StatelessWidget {
           CircleAvatar(
             backgroundImage: avatarUrl != null
                 ? NetworkImage(avatarUrl!)
-                : AssetImage(tProfileImage) as ImageProvider,
+                : AssetImage("assets/images/profile/avatar.jpg") as ImageProvider,
             backgroundColor: Colors.blue,
             radius: 30,
           ),

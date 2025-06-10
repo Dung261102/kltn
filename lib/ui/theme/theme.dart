@@ -1,4 +1,4 @@
-//Chứa định nghĩa màu sắc, typography, các ThemeData của ứng dụng.
+//Chứa định nghĩa màu sắc, typography, các ThemeData của ứng dụng. (chính)
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

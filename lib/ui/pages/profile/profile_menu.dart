@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 
 
-// Class ProfileMenuWidget định nghĩa một menu item có thể bấm được trong giao diện người dùng
+
 class ProfileMenuWidget extends StatelessWidget {
   // Constructor nhận các tham số cần thiết cho widget
   const ProfileMenuWidget({
