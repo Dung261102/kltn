@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 
@@ -7,9 +9,12 @@ import 'package:glucose_real_time/db/db_helper.dart';
 import 'package:glucose_real_time/services/notification_services.dart';
 
 import 'package:glucose_real_time/services/theme_service.dart';
+import 'package:glucose_real_time/ui/pages/home/homePage.dart';
+import 'package:glucose_real_time/ui/pages/login/login_page.dart';
 
 import 'package:glucose_real_time/ui/theme/theme.dart';
 import 'package:glucose_real_time/ui/widgets/custom_bottom_navigation_bar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 //theme_service
 
 Future<void> main() async {
@@ -44,12 +49,60 @@ class MyApp extends StatelessWidget {
 
       // Định nghĩa routes (đường dẫn), nơi mỗi route là một màn hình
       routes: {
-        "/":
-            (context) =>
-                MainPage(), // Khi route là "/", nó sẽ điều hướng đến màn hình MainPage
+        // "/":
+        //     (context) =>
+        //         MainPage(), // Khi route là "/", nó sẽ điều hướng đến màn hình MainPage
+
+        // "/": (context) => CheckLoginPage(), // Trang kiểm tra login đầu tiên
+        "/main": (context) => MainPage(),   // Trang chính của app
+        // "/login": (context) => LoginPage(),
+        "/": (context) => LoginPage(),
+        // "/home": (context) => HomePage(),
       },
 
       // home: ReminderPage(), // màn hình đầu tiên
+    );
+  }
+}
+
+// 🆕 Màn hình kiểm tra trạng thái đăng nhập từ SharedPreferences
+class CheckLoginPage extends StatefulWidget {
+  @override
+  _CheckLoginPageState createState() => _CheckLoginPageState();
+}
+
+class _CheckLoginPageState extends State<CheckLoginPage> {
+  @override
+  void initState() {
+    super.initState();
+    checkLoginStatus();
+  }
+
+  void checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // 🕒 Delay tạo hiệu ứng Splash (có thể điều chỉnh thời gian hoặc bỏ luôn)
+    Timer(Duration(seconds: 2), () {
+      final userId = prefs.getInt('userid');
+      final userMail = prefs.getString('usermail');
+
+      if (userId == null || userMail == null) {
+        // ❌ Nếu chưa đăng nhập → chuyển sang LoginPage
+        Navigator.pushReplacementNamed(context, '/login');
+      } else {
+        // ✅ Nếu đã đăng nhập → chuyển sang HomePage hoặc MainPage
+        Navigator.pushReplacementNamed(context, '/home'); // Hoặc '/main'
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        // Hiển thị vòng quay chờ trong khi kiểm tra login
+        child: CircularProgressIndicator(),
+      ),
     );
   }
 }
