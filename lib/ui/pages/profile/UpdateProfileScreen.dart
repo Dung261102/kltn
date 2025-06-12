@@ -190,7 +190,7 @@ class UpdateProfileScreen extends StatelessWidget {
             child: ElevatedButton(
               onPressed: controller.saveChanges,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
+                backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 15),
                 elevation: 3,

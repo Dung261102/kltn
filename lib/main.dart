@@ -55,11 +55,11 @@ class MyApp extends StatelessWidget {
         //         MainPage(), // Khi route là "/", nó sẽ điều hướng đến màn hình MainPage
 
         // "/": (context) => CheckLoginPage(), // Trang kiểm tra login đầu tiên
-        "/main": (context) => MainPage(), // Trang chính của app
+        // "/main": (context) => MainPage(), // Trang chính của app
         // "/login": (context) => LoginPage(),
-        // "/": (context) => LoginPage(),
+        "/": (context) => LoginPage(),
         // "/home": (context) => HomePage(),
-         "/": (context) => MainPage(),
+        //  "/": (context) => MainPage(),
       },
 
       // home: ReminderPage(), // màn hình đầu tiên
