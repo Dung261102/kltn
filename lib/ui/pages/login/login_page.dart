@@ -27,67 +27,114 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Material( // dùng Material để hiển thị giao diện kiểu Material Design
-      child: SingleChildScrollView( // giúp cuộn được khi bàn phím hiển thị
-        child: Container(
-          height: MediaQuery.of(context).size.height, // lấy chiều cao của màn hình
-          width: MediaQuery.of(context).size.width,   // lấy chiều rộng của màn hình
-          decoration: BoxDecoration(
-            gradient: LinearGradient( // nền dạng gradient từ xám sang đen
-              colors: [Colors.grey, Colors.black87],
-              begin: const FractionalOffset(0.0, 1.0),
-              end: const FractionalOffset(0.0, 1.0),
-              stops: [0.0, 1.0],
-              tileMode: TileMode.repeated,
+    return Scaffold(
+      backgroundColor: Color(0xFFF6F7FB),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          child: Container(
+            width: 380,
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 16,
+                  offset: Offset(0, 8),
+                ),
+              ],
             ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              SizedBox(height: 60), // khoảng cách phía trên logo
-              Container(
-                alignment: Alignment.center,
-                child: Image.asset(
-                  "assets/images/logo.png", // logo ứng dụng
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: 10),
+                Image.asset(
+                  "assets/images/logo.png",
                   fit: BoxFit.cover,
-                  width: 150,
-                  height: 150,
+                  width: 100,
+                  height: 100,
                 ),
-              ),
-              SizedBox(height: 10),
-              Form(
-                key: _formKey, // gán form key để có thể validate sau này
-                child: Column(
-                  children: [
-                    FormFields( // widget tùy chỉnh cho input email
-                      controller: _emailController,
-                      data: Icons.email,
-                      txtHint: 'Email',
-                      obsecure: false,
-                    ),
-                    FormFields( // widget tùy chỉnh cho input password
-                      controller: _passwordController,
-                      data: Icons.lock,
-                      txtHint: 'Password',
-                      obsecure: true,
-                    ),
-                  ],
+                SizedBox(height: 18),
+                Text(
+                  'Login',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue[700],
+                  ),
                 ),
-              ),
-              SizedBox(height: 15),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Forgot Password',
-                    style: subTitleStyle.copyWith(
-                      color: Colors.white,
+                SizedBox(height: 24),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.email, color: Colors.blue[300]),
+                          hintText: 'Email',
+                          filled: true,
+                          fillColor: Color(0xFFF6F7FB),
+                          contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.blue, width: 1.5),
+                          ),
+                        ),
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      SizedBox(height: 18),
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.lock, color: Colors.blue[300]),
+                          hintText: 'Password',
+                          filled: true,
+                          fillColor: Color(0xFFF6F7FB),
+                          contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.blue, width: 1.5),
+                          ),
+                        ),
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 18),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: GestureDetector(
+                    onTap: () {},
+                    child: Text(
+                      'Forgot Password?',
+                      style: TextStyle(
+                        color: Colors.blue[700],
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
-                  SizedBox(width: 15),
-                  ElevatedButton( // nút đăng nhập
+                ),
+                SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
                     onPressed: () {
-                      // kiểm tra nếu cả 2 trường không rỗng thì gọi hàm doLogin, ngược lại hiện cảnh báo
                       _emailController.text.isNotEmpty &&
                           _passwordController.text.isNotEmpty
                           ? doLogin(_emailController.text, _passwordController.text)
@@ -97,45 +144,55 @@ class _LoginPageState extends State<LoginPage> {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue, // màu nền của nút
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 4,
+                      backgroundColor: Colors.blue[700],
                     ),
                     child: Text(
                       "Login",
-                      style: titleStyle.copyWith(
+                      style: TextStyle(
                         color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
                       ),
                     ),
                   ),
-                ],
-              ),
-              SizedBox(height: 20),
-              InkWell( // nhấn vào sẽ chuyển sang màn hình đăng ký
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => RegisterPage()),
-                  );
-                },
-                child: Row(
+                ),
+                SizedBox(height: 24),
+                Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Don`t have an account', // hỏi người dùng nếu chưa có tài khoản
-                      style: TextStyle(color: Colors.white),
+                      'Don`t have an account?',
+                      style: TextStyle(
+                        color: Colors.black54,
+                        fontSize: 16,
+                      ),
                     ),
                     SizedBox(width: 10),
-                    Text(
-                      'Register', // chuyển sang trang đăng ký
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 18,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => RegisterPage()),
+                        );
+                      },
+                      child: Text(
+                        'Register',
+                        style: TextStyle(
+                          color: Colors.blue[700],
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -166,3 +223,4 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 }
+
