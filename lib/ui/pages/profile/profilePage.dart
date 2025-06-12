@@ -6,6 +6,7 @@ import 'package:glucose_real_time/ui/theme/theme.dart';
 import 'package:glucose_real_time/ui/widgets/common_appbar.dart';
 import 'package:glucose_real_time/ui/widgets/button.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
+// import 'package:glucose_real_time/ui/pages/profile/viewProfile.dart';
 
 import 'UpdateProfileScreen.dart';
 
@@ -25,6 +26,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // Tên người dùng hiện tại
   String userName = "Nguyen Dung";
+  String avatarPath = "assets/images/profile/avatar.jpg";
 
   // Thông tin cơ thể người dùng
   double height = 170.0;  // Chiều cao mặc định (cm)
@@ -206,33 +208,34 @@ class _ProfilePageState extends State<ProfilePage> {
           style: headingStyle,
         ),
         const SizedBox(height: 4),
-        GestureDetector(
-          onTap: () async {
-            final result = await Get.to(() => const UpdateProfileScreen());
-            if (result != null && result is Map<String, dynamic>) {
-              setState(() {
-                userName = result['name'] ?? userName;
-                height = result['height'] ?? height;
-                weight = result['weight'] ?? weight;
-                age = result['age'] ?? age;
-              });
-            }
-          },
-          child: Stack(
-            children: [
-              SizedBox(
-                width: 120,
-                height: 120,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(100),
-                  child: const Image(
-                    image: AssetImage("assets/images/profile/avatar.jpg"),
-                  ),
+        Stack(
+          children: [
+            SizedBox(
+              width: 120,
+              height: 120,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(100),
+                child: Image(
+                  image: AssetImage(avatarPath),
                 ),
               ),
-              Positioned(
-                bottom: 0,
-                right: 0,
+            ),
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: GestureDetector(
+                onTap: () async {
+                  final result = await Get.to(() => const UpdateProfileScreen());
+                  if (result != null && result is Map<String, dynamic>) {
+                    setState(() {
+                      userName = result['name'] ?? userName;
+                      height = result['height'] ?? height;
+                      weight = result['weight'] ?? weight;
+                      age = result['age'] ?? age;
+                      avatarPath = result['avatar'] ?? avatarPath;
+                    });
+                  }
+                },
                 child: Container(
                   width: 40,
                   height: 40,
@@ -247,8 +250,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
         const SizedBox(height: 2),
         Text(
@@ -296,14 +299,17 @@ class _ProfilePageState extends State<ProfilePage> {
           icon: LineAwesomeIcons.cog_solid,
           onPress: () {},
         ),
-        // ProfileMenuWidget(
-        //   title: 'Profile',
-        //   icon: LineAwesomeIcons.user,
-        //   onPress: () {
-        //     Get.to(() => ViewProfileScreen(
-        //     ));
-        //   },
-        // ),
+        
+        ProfileMenuWidget(
+          title: 'Profile',
+          icon: LineAwesomeIcons.user,
+          onPress: () {
+
+            // Get.to(() => ViewProfileScreen(
+            // ));
+
+          },
+        ),
 
         ProfileMenuWidget(
           title: 'Privacy Policy',
