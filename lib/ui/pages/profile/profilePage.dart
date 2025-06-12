@@ -1,10 +1,10 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:glucose_real_time/ui/pages/profile/profile_menu.dart';
 import 'package:glucose_real_time/services/notification_services.dart';
 import 'package:glucose_real_time/ui/theme/theme.dart';
 import 'package:glucose_real_time/ui/widgets/common_appbar.dart';
+import 'package:glucose_real_time/ui/widgets/button.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 
 import 'UpdateProfileScreen.dart';
@@ -25,7 +25,122 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // Tên người dùng hiện tại
   String userName = "Nguyen Dung";
-  // chưa fix lỗi bấm vo username cũng chuyển màn hình
+
+  // Thông tin cơ thể người dùng
+  double height = 170.0;  // Chiều cao mặc định (cm)
+  double weight = 65.0;   // Cân nặng mặc định (kg)
+  int age = 25;          // Tuổi mặc định
+
+  // Hàm cập nhật chiều cao
+  void _updateHeight() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Update Height'),
+        content: TextField(
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            hintText: 'Enter height in cm',
+            suffixText: 'cm',
+          ),
+          onSubmitted: (value) {
+            if (value.isNotEmpty) {
+              setState(() {
+                height = double.parse(value);
+              });
+              Navigator.pop(context);
+            }
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text('Update'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Hàm cập nhật cân nặng
+  void _updateWeight() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Update Weight'),
+        content: TextField(
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            hintText: 'Enter weight in kg',
+            suffixText: 'kg',
+          ),
+          onSubmitted: (value) {
+            if (value.isNotEmpty) {
+              setState(() {
+                weight = double.parse(value);
+              });
+              Navigator.pop(context);
+            }
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text('Update'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Hàm cập nhật tuổi
+  void _updateAge() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Update Age'),
+        content: TextField(
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            hintText: 'Enter age',
+            suffixText: 'years',
+          ),
+          onSubmitted: (value) {
+            if (value.isNotEmpty) {
+              setState(() {
+                age = int.parse(value);
+              });
+              Navigator.pop(context);
+            }
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text('Update'),
+          ),
+        ],
+      ),
+    );
+  }
 
   // Hàm gọi UI chọn thiết bị - logic sẽ xử lý sau
   void _onAddDevicePressed() {
@@ -45,11 +160,11 @@ class _ProfilePageState extends State<ProfilePage> {
         notifyHelper: notifyHelper,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(25),
+        padding: const EdgeInsets.fromLTRB(25, 10, 25, 25),
         child: Column(
           children: [
             _buildProfileHeader(),             // Bấm avatar sẽ điều hướng đến chỉnh sửa
-            const SizedBox(height: 20),
+            const SizedBox(height: 15),
             _buildDeviceInfo(),                // UI thêm thiết bị và thông tin thiết bị
             const SizedBox(height: 30),
             const Divider(),
@@ -84,18 +199,26 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // Avatar + tên người dùng, có thể bấm để chỉnh sửa profile
   Widget _buildProfileHeader() {
-    return GestureDetector(
-      onTap: () async {
-        final result = await Get.to(() => const UpdateProfileScreen());
-        if (result != null && result is String) {
-          setState(() {
-            userName = result;
-          });
-        }
-      },
-      child: Column(
-        children: [
-          Stack(
+    return Column(
+      children: [
+        Text(
+          "My Profile",
+          style: headingStyle,
+        ),
+        const SizedBox(height: 4),
+        GestureDetector(
+          onTap: () async {
+            final result = await Get.to(() => const UpdateProfileScreen());
+            if (result != null && result is Map<String, dynamic>) {
+              setState(() {
+                userName = result['name'] ?? userName;
+                height = result['height'] ?? height;
+                weight = result['weight'] ?? weight;
+                age = result['age'] ?? age;
+              });
+            }
+          },
+          child: Stack(
             children: [
               SizedBox(
                 width: 120,
@@ -126,13 +249,40 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          Text(
-            userName,
-            style: headingStyle,
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          userName,
+          style: headingStyle,
+        ),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            MyButton(
+              label: "$height cm\nHeight",
+              onTap: () {},
+              color: white,
+              valueStyle: titleStyle,
+              labelStyle: subTitleStyle,
+            ),
+            MyButton(
+              label: "$weight kg\nWeight",
+              onTap: () {},
+              color: white,
+              valueStyle: titleStyle,
+              labelStyle: subTitleStyle,
+            ),
+            MyButton(
+              label: "$age years\nAge",
+              onTap: () {},
+              color: white,
+              valueStyle: titleStyle,
+              labelStyle: subTitleStyle,
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -140,16 +290,21 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildMenuOptions() {
     return Column(
       children: [
+        
         ProfileMenuWidget(
           title: 'Settings',
           icon: LineAwesomeIcons.cog_solid,
           onPress: () {},
         ),
-        ProfileMenuWidget(
-          title: 'Profile',
-          icon: LineAwesomeIcons.user,
-          onPress: () {},
-        ),
+        // ProfileMenuWidget(
+        //   title: 'Profile',
+        //   icon: LineAwesomeIcons.user,
+        //   onPress: () {
+        //     Get.to(() => ViewProfileScreen(
+        //     ));
+        //   },
+        // ),
+
         ProfileMenuWidget(
           title: 'Privacy Policy',
           icon: LineAwesomeIcons.key_solid,

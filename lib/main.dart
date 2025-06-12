@@ -9,8 +9,8 @@ import 'package:glucose_real_time/db/db_helper.dart';
 import 'package:glucose_real_time/services/notification_services.dart';
 
 import 'package:glucose_real_time/services/theme_service.dart';
-import 'package:glucose_real_time/ui/pages/home/homePage.dart';
 import 'package:glucose_real_time/ui/pages/login/login_page.dart';
+import 'package:glucose_real_time/ui/theme/test/utils.dart';
 
 import 'package:glucose_real_time/ui/theme/theme.dart';
 import 'package:glucose_real_time/ui/widgets/custom_bottom_navigation_bar.dart';
@@ -19,10 +19,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Utils.initBaseUrl(); // 👈 quan trọng!
+
   // await DBHelper.dropTable(); // Xoá bảng 'tasks'
   await DBHelper.initDb();
   await GetStorage.init();
-
 
   // Khởi tạo NotifyHelper
   final notifyHelper = NotifyHelper();
@@ -54,10 +55,11 @@ class MyApp extends StatelessWidget {
         //         MainPage(), // Khi route là "/", nó sẽ điều hướng đến màn hình MainPage
 
         // "/": (context) => CheckLoginPage(), // Trang kiểm tra login đầu tiên
-        "/main": (context) => MainPage(),   // Trang chính của app
+        "/main": (context) => MainPage(), // Trang chính của app
         // "/login": (context) => LoginPage(),
-        "/": (context) => LoginPage(),
+        // "/": (context) => LoginPage(),
         // "/home": (context) => HomePage(),
+         "/": (context) => MainPage(),
       },
 
       // home: ReminderPage(), // màn hình đầu tiên

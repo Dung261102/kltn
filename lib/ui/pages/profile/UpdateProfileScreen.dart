@@ -4,14 +4,31 @@ import 'package:glucose_real_time/ui/theme/theme.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 
 /// Màn hình cập nhật hồ sơ người dùng
-class UpdateProfileScreen extends StatelessWidget {
+class UpdateProfileScreen extends StatefulWidget {
   const UpdateProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Controller cho các ô nhập liệu
-    final TextEditingController nameController = TextEditingController();
+  State<UpdateProfileScreen> createState() => _UpdateProfileScreenState();
+}
 
+class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
+  // Controller cho các ô nhập liệu
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController heightController = TextEditingController();
+  final TextEditingController weightController = TextEditingController();
+  final TextEditingController ageController = TextEditingController();
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    heightController.dispose();
+    weightController.dispose();
+    ageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -31,7 +48,7 @@ class UpdateProfileScreen extends StatelessWidget {
           children: [
             _buildAvatar(),
             const SizedBox(height: 50),
-            _buildProfileForm(nameController),
+            _buildProfileForm(),
             const SizedBox(height: 20),
           ],
         ),
@@ -75,7 +92,7 @@ class UpdateProfileScreen extends StatelessWidget {
   }
 
   /// Form nhập thông tin người dùng
-  Widget _buildProfileForm(TextEditingController nameController) {
+  Widget _buildProfileForm() {
     return Form(
       child: Column(
         children: [
@@ -88,23 +105,29 @@ class UpdateProfileScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           TextFormField(
+            controller: heightController,
+            keyboardType: TextInputType.number,
             decoration: const InputDecoration(
-              labelText: 'E-Mail',
-              prefixIcon: Icon(LineAwesomeIcons.envelope),
+              labelText: 'Height (cm)',
+              prefixIcon: Icon(LineAwesomeIcons.arrow_alt_circle_up),
             ),
           ),
           const SizedBox(height: 20),
           TextFormField(
+            controller: weightController,
+            keyboardType: TextInputType.number,
             decoration: const InputDecoration(
-              labelText: 'Phone Number',
-              prefixIcon: Icon(LineAwesomeIcons.phone_solid),
+              labelText: 'Weight (kg)',
+              prefixIcon: Icon(LineAwesomeIcons.chart_bar),
             ),
           ),
           const SizedBox(height: 20),
           TextFormField(
+            controller: ageController,
+            keyboardType: TextInputType.number,
             decoration: const InputDecoration(
-              labelText: 'Password',
-              prefixIcon: Icon(LineAwesomeIcons.fingerprint_solid),
+              labelText: 'Age',
+              prefixIcon: Icon(LineAwesomeIcons.calendar),
             ),
           ),
           const SizedBox(height: 20),
@@ -112,19 +135,65 @@ class UpdateProfileScreen extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
+                // Get current values
                 final updatedName = nameController.text.trim();
+                final heightText = heightController.text.trim();
+                final weightText = weightController.text.trim();
+                final ageText = ageController.text.trim();
+
+                // Create result map with only changed values
+                final Map<String, dynamic> result = {};
+
+                // Only add name if it's not empty
                 if (updatedName.isNotEmpty) {
-                  Get.back(result: updatedName); // Trả tên về ProfilePage
-                } else {
-                  Get.snackbar("Lỗi", "Vui lòng nhập tên hợp lệ");
+                  result['name'] = updatedName;
                 }
+
+                // Only validate and add height if it's been changed
+                if (heightText.isNotEmpty) {
+                  final height = double.tryParse(heightText);
+                  if (height == null || height <= 0) {
+                    Get.snackbar("Error", "Please enter a valid height");
+                    return;
+                  }
+                  result['height'] = height;
+                }
+
+                // Only validate and add weight if it's been changed
+                if (weightText.isNotEmpty) {
+                  final weight = double.tryParse(weightText);
+                  if (weight == null || weight <= 0) {
+                    Get.snackbar("Error", "Please enter a valid weight");
+                    return;
+                  }
+                  result['weight'] = weight;
+                }
+
+                // Only validate and add age if it's been changed
+                if (ageText.isNotEmpty) {
+                  final age = int.tryParse(ageText);
+                  if (age == null || age <= 0) {
+                    Get.snackbar("Error", "Please enter a valid age");
+                    return;
+                  }
+                  result['age'] = age;
+                }
+
+                // If no changes were made, show a message
+                if (result.isEmpty) {
+                  Get.snackbar("Notice", "No changes were made");
+                  return;
+                }
+
+                // Return the changes
+                Get.back(result: result);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.black,
                 shape: const StadiumBorder(),
               ),
               child: const Text(
-                'Edit Profile',
+                'Save Changes',
                 style: TextStyle(color: Colors.white),
               ),
             ),
@@ -133,5 +202,4 @@ class UpdateProfileScreen extends StatelessWidget {
       ),
     );
   }
-
 }

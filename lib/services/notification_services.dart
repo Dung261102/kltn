@@ -48,12 +48,14 @@ class NotifyHelper {
   }
 
   // hàm displayNotification dùng để hiển thị thông báo trong Flutter
-  Future <void> displayNotification({required String title, required String body}) async {
+  Future<void> displayNotification({
+    required String title,
+    required String body,
+  }) async {
     print("doing test");
 
     // Cấu hình thông báo cho Android
-    var androidPlatformChannelSpecifics =
-    new AndroidNotificationDetails(
+    var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
       'your channel id',
       'your channel name',
       channelDescription: 'your channel description',
@@ -82,7 +84,6 @@ class NotifyHelper {
 
   //hàm lên lịch thông báo với thời gian đã định -chưa được
   scheduledNotification(int hour, int minutes, Task task) async {
-
     await flutterLocalNotificationsPlugin.zonedSchedule(
       task.id!.toInt(),
       task.title,
@@ -101,16 +102,22 @@ class NotifyHelper {
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
-      payload: "${task.title}|"+"${task.note}|"
+      payload: "${task.title}|" + "${task.note}|",
     );
   }
 
   tz.TZDateTime _convertTime(int hour, int minutes) {
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduleDate =
-      tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minutes );
+    tz.TZDateTime scheduleDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minutes,
+    );
 
-    if(scheduleDate.isBefore(now)){
+    if (scheduleDate.isBefore(now)) {
       scheduleDate = scheduleDate.add(const Duration(days: 1));
     }
     return scheduleDate;
@@ -118,7 +125,13 @@ class NotifyHelper {
 
   Future<void> _configureLocalTimezone() async {
     tz.initializeTimeZones();
-    final String timeZone = await FlutterNativeTimezone.getLocalTimezone();
+    String timeZone = await FlutterNativeTimezone.getLocalTimezone();
+
+    // Sửa lỗi tên timezone không hợp lệ
+    if (timeZone == 'Asia/Saigon') {
+      timeZone = 'Asia/Ho_Chi_Minh';
+    }
+
     tz.setLocalLocation(tz.getLocation(timeZone));
   }
 
@@ -146,12 +159,10 @@ class NotifyHelper {
       print("Notification Done");
     }
 
-    if(payload=="Theme Changed") {
+    if (payload == "Theme Changed") {
       print("Nothing navigate to");
-
-    }else{
+    } else {
       Get.to(() => NotifiedPage(label: payload));
-
     }
   }
 

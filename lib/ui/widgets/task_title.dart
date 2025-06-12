@@ -42,16 +42,13 @@ class TaskTile extends StatelessWidget {
                 children: [
                   // Tiêu đề công việc
                   Text(
-                    task?.title ?? "", // Nếu task hoặc title null thì hiển thị chuỗi rỗng
-                    style: GoogleFonts.lato(
-                      textStyle: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white
-                      ),
+                    task?.title ?? "",
+                    style: titleStyle.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 12), // Khoảng cách
+                  SizedBox(height: 12),
 
                   // Hiển thị thời gian bắt đầu - kết thúc
                   Row(
@@ -62,14 +59,11 @@ class TaskTile extends StatelessWidget {
                         color: Colors.grey[200],
                         size: 18,
                       ),
-                      SizedBox(width: 4), // Khoảng cách giữa icon và text
+                      SizedBox(width: 4),
                       Text(
-                        "${task!.startTime} - ${task!.endTime}", // Thời gian của task
-                        style: GoogleFonts.lato(
-                          textStyle: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey[100]
-                          ),
+                        "${task!.startTime} - ${task!.endTime}",
+                        style: subTitleStyle.copyWith(
+                          color: Colors.grey[100],
                         ),
                       ),
                     ],

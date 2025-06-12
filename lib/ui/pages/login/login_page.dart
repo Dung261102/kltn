@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:glucose_real_time/ui/pages/login/register_page.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // dùng để lưu dữ liệu cục bộ
+import 'package:glucose_real_time/ui/theme/theme.dart';  // Import theme
 
 import '../../../rest/rest_api.dart'; // chứa hàm gọi API đăng nhập
 import '../../widgets/custom_bottom_navigation_bar.dart';
@@ -78,8 +79,10 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Forgot Password', // chỉ hiển thị, chưa xử lý chức năng quên mật khẩu
-                    style: TextStyle(color: Colors.white, fontSize: 12),
+                    'Forgot Password',
+                    style: subTitleStyle.copyWith(
+                      color: Colors.white,
+                    ),
                   ),
                   SizedBox(width: 15),
                   ElevatedButton( // nút đăng nhập
@@ -98,7 +101,9 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     child: Text(
                       "Login",
-                      style: TextStyle(color: Colors.white), // màu chữ nút
+                      style: titleStyle.copyWith(
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ],

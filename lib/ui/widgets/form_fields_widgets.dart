@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:glucose_real_time/ui/theme/theme.dart';  // Import theme
 
 // class FormFields extends StatelessWidget
 // {
@@ -36,13 +36,14 @@ class FormFields extends StatelessWidget {
       child: TextFormField(
         controller: controller,
         obscureText: obsecure,
+        style: titleStyle,
         decoration: InputDecoration(
           border: InputBorder.none,
-          prefixIcon: Icon(data,color: Colors.grey,),
-          hintText: txtHint
+          prefixIcon: Icon(data, color: Colors.grey),
+          hintText: txtHint,
+          hintStyle: subTitleStyle,
         ),
       ),
     );
   }
-
 }

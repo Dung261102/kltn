@@ -44,7 +44,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
           : null,
       actions: actions ??
           [
-            CircleAvatar(backgroundImage: AssetImage("images/profile.png")),
+            CircleAvatar(backgroundImage: AssetImage("assets/images/profile/avatar.jpg")),
             SizedBox(width: 20),
           ],
     );

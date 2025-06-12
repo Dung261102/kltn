@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:glucose_real_time/ui/theme/theme.dart';  // Import theme
 
 class LineChart extends StatelessWidget {
   const LineChart({super.key});
@@ -38,9 +39,7 @@ class LineChart extends StatelessWidget {
             children: [
               Text(
                 "Health Report",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                style: headingStyle.copyWith(
                   color: Colors.black,
                 ),
               ),
@@ -59,7 +58,7 @@ class LineChart extends StatelessWidget {
                   children: [
                     CircleAvatar(radius: 5, backgroundColor: Colors.red),
                     SizedBox(width: 5),
-                    Text("Heart"),
+                    Text("Heart", style: titleStyle),
                   ],
                 ),
               ),
