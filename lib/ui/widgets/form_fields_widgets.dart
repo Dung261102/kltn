@@ -28,7 +28,7 @@ class FormFields extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.grey[100],
         borderRadius: BorderRadius.all(Radius.circular(8)),
       ),
       padding: EdgeInsets.all(5),

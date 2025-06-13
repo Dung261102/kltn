@@ -1,186 +1,126 @@
-// Import các thư viện cần thiết từ Flutter và các gói bên ngoài
-import 'package:flutter/material.dart';                    // Giao diện Flutter
-import 'package:fluttertoast/fluttertoast.dart';          // Thư viện hiển thị toast message (popup thông báo)
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
-// Import các file trong project
-import '../../../rest/rest_api.dart';                      // Gọi API đăng ký người dùng
-import '../../widgets/form_fields_widgets.dart';          // Widget custom cho các ô nhập liệu
-import 'login_page.dart';                                 // Trang đăng nhập
+import '../../../rest/rest_api.dart'; // Gọi API đăng ký
+import 'login_page.dart';            // Trang đăng nhập
 
-// Tạo màn hình RegisterPage là một StatefulWidget vì có trạng thái thay đổi (form nhập liệu)
 class RegisterPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return RegisterPageState(); // Trả về State tương ứng
+    return RegisterPageState();
   }
 }
 
-// Lớp chứa logic và giao diện của trang đăng ký
 class RegisterPageState extends State<RegisterPage> {
-  // Tạo các controller để lấy dữ liệu từ các ô nhập liệu
-  final TextEditingController username = TextEditingController();
+  // Controller cho các ô nhập liệu
   final TextEditingController email = TextEditingController();
-  final TextEditingController phone = TextEditingController();
-  final TextEditingController password = TextEditingController();
-  final TextEditingController address = TextEditingController();
+  final TextEditingController username = TextEditingController();
   final TextEditingController dob = TextEditingController();
+  final TextEditingController phone = TextEditingController();
+  final TextEditingController address = TextEditingController();
+  final TextEditingController password = TextEditingController();
   final TextEditingController confirmPassword = TextEditingController();
 
-  // Khóa để kiểm tra tính hợp lệ của form
+  // Key để validate form
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  // Hàm build giao diện
   @override
   Widget build(BuildContext context) {
-    final heightOfScreen = MediaQuery.of(context).size.height;
-    final widthOfScreen = MediaQuery.of(context).size.width;
     return Scaffold(
-      backgroundColor: Color(0xFFF6F7FB),
+      backgroundColor: Colors.grey[300], // Nền toàn màn hình
       body: Center(
-        child: SingleChildScrollView(
-          child: 
-          Container(
-            width: widthOfScreen > 400 ? 400 : widthOfScreen * 0.95,
-            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(32),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 16,
-                  offset: Offset(0, 8),
-                ),
-              ],
-            ),
+        child: Container(
+          padding: EdgeInsets.all(30),
+          margin: EdgeInsets.symmetric(horizontal: 25),
+          decoration: BoxDecoration(
+            color: Colors.white, // Giao diện form nền trắng
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 10,
+                offset: Offset(0, 5),
+              ),
+            ],
+          ),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey, // Form validation
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Create Account",
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blueAccent,
+                    ),
+                  ),
+                  SizedBox(height: 25),
 
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  'Create Account',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue[700],
-                  ),
-                ),
-                SizedBox(height: 8),
-              
-                SizedBox(height: 28),
-                Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      _buildField(email, 'Email', Icons.email, false),
-                      SizedBox(height: 16),
-                      _buildField(username, 'Name', Icons.person, false),
-                      SizedBox(height: 16),
-                      _buildField(dob, 'Date of Birth', Icons.calendar_today, false),
-                      SizedBox(height: 16),
-                      _buildField(phone, 'Phone Number', Icons.phone, false),
-                      SizedBox(height: 16),
-                      _buildField(address, 'Address', Icons.home, false),
-                      SizedBox(height: 16),
-                      _buildField(password, 'Password', Icons.lock, true),
-                      SizedBox(height: 16),
-                      _buildField(confirmPassword, 'Confirm Password', Icons.lock_outline, true),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 28),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
+                  _buildField(email, Icons.email, 'Email'),
+                  _buildField(username, Icons.person, 'Username'),
+                  _buildField(dob, Icons.calendar_today, 'Date of Birth'),
+                  _buildField(phone, Icons.phone, 'Phone'),
+                  _buildField(address, Icons.home, 'Address'),
+                  _buildField(password, Icons.lock, 'Password', isPassword: true),
+                  _buildField(confirmPassword, Icons.lock_outline, 'Confirm Password', isPassword: true),
+
+                  SizedBox(height: 20),
+
+                  ElevatedButton(
                     onPressed: () {
-                      if (username.text.isNotEmpty &&
-                          password.text.isNotEmpty &&
-                          email.text.isNotEmpty &&
-                          phone.text.isNotEmpty &&
-                          address.text.isNotEmpty &&
-                          dob.text.isNotEmpty &&
-                          confirmPassword.text.isNotEmpty) {
+                      if (_formKey.currentState!.validate()) {
                         if (password.text != confirmPassword.text) {
                           Fluttertoast.showToast(
-                            msg: 'Passwords do not match',
+                            msg: "Passwords do not match",
                             textColor: Colors.red,
                           );
                           return;
                         }
+
+                        // Gọi API đăng ký
                         doRegister(
                           username.text,
                           email.text,
                           password.text,
                           phone.text,
-                        );
-                      } else {
-                        Fluttertoast.showToast(
-                          msg: 'All fields are required',
-                          textColor: Colors.red,
+                          dob.text,
+                          address.text,
                         );
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      elevation: 4,
-                    ).copyWith(
-                      backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-                        return Colors.transparent;
-                      }),
-                      shadowColor: MaterialStateProperty.all(Colors.transparent),
+                      backgroundColor: Colors.blueAccent,
+                      padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                     ),
-                    child: Ink(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color(0xFF6A8DFF), Color(0xFF4F6BED)],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Container(
-                        alignment: Alignment.center,
-                        child: Text(
-                          'Sign up',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
+                    child: Text(
+                      "Register",
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                  ),
+
+                  SizedBox(height: 20),
+
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => LoginPage()),
+                      );
+                    },
+                    child: Text(
+                      "Already have an account? Login",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.blueAccent,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
-                ),
-                SizedBox(height: 18),
-                Text(
-                  'Already have an account',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.black54,
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => LoginPage()),
-                    );
-                  },
-                  child: Text(
-                    'Or Login',
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.blue[700],
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -188,66 +128,49 @@ class RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  Widget _buildField(TextEditingController controller, String hint, IconData icon, bool obsecure) {
-    return TextFormField(
-      controller: controller,
-      obscureText: obsecure,
-      decoration: InputDecoration(
-        prefixIcon: Icon(icon, color: Colors.blue[300]),
-        hintText: hint,
-        filled: true,
-        fillColor: Color(0xFFF6F7FB),
-        contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.transparent),
+  // Widget xây dựng các trường nhập liệu
+  Widget _buildField(TextEditingController controller, IconData icon, String hint, {bool isPassword = false}) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 15),
+      child: TextFormField(
+        controller: controller,
+        obscureText: isPassword,
+        decoration: InputDecoration(
+          prefixIcon: Icon(icon),
+          hintText: hint,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          filled: true,
+          fillColor: Colors.grey[100],
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.blue, width: 1.5),
-        ),
-      ),
-      style: TextStyle(fontSize: 16),
-    );
-  }
-
-  Widget _socialButton(String assetPath) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Image.asset(assetPath, width: 22, height: 22),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return '$hint is required';
+          }
+          return null;
+        },
       ),
     );
   }
 
-  // Hàm xử lý khi nhấn nút đăng ký
+  // Hàm gọi API đăng ký
   Future<void> doRegister(
-      String username, String email, String password, String phoneno) async {
-    var res = await userRegister(username, email, password, phoneno); // Gọi API đăng ký
+      String username,
+      String email,
+      String password,
+      String phone,
+      String dob,
+      String address,
+  ) async {
+    var res = await userRegister(username, email, password, phone, dob, address); // Gọi API
+
     if (res['success']) {
-      // Nếu thành công, chuyển sang trang đăng nhập
+      Fluttertoast.showToast(msg: 'Registration successful', textColor: Colors.green);
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => LoginPage()),
+        MaterialPageRoute(builder: (_) => LoginPage()),
       );
     } else {
-      // Nếu thất bại, hiển thị thông báo lỗi
-      Fluttertoast.showToast(
-        msg: 'Try again ?',
-        textColor: Colors.red,
-      );
+      Fluttertoast.showToast(msg: 'Registration failed, try again', textColor: Colors.red);
     }
   }
 }
