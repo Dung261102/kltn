@@ -22,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Changed from grey to white
+      backgroundColor: Colors.white,
       body: Center(
         child: SingleChildScrollView(
           padding: EdgeInsets.all(25),
@@ -31,17 +31,29 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox(height: 20), // Added more top spacing
+                SizedBox(height: 20),
                 Text(
                   "Login here",
                   style: TextStyle(
-                    fontSize: 28, // Increased font size
+                    fontSize: 32,
                     fontWeight: FontWeight.bold,
                     color: Colors.blueAccent,
+                    letterSpacing: 1.2,
                   ),
                 ),
 
-                SizedBox(height: 35), // Increased spacing after title
+                SizedBox(height: 10),
+
+                Text(
+                  "Welcome back you've been missed!",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                    letterSpacing: 0.5,
+                  ),
+                ),
+
+                SizedBox(height: 35),
 
                 // Trường email
                 FormFields(
@@ -118,9 +130,9 @@ class _LoginPageState extends State<LoginPage> {
                       Text(
                         'Register',
                         style: TextStyle(
-                          fontSize: 16, // Increased font size
+                          fontSize: 16,
                           color: Colors.blueAccent,
-                          fontWeight: FontWeight.bold, // Made bolder
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],

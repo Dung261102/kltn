@@ -28,20 +28,28 @@ class FormFields extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.all(Radius.circular(8)),
+        color: Colors.white,
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade100,
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       padding: EdgeInsets.all(5),
-      margin: EdgeInsets.all(5),
+      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 5),
       child: TextFormField(
         controller: controller,
         obscureText: obsecure,
         style: titleStyle,
         decoration: InputDecoration(
           border: InputBorder.none,
-          prefixIcon: Icon(data, color: Colors.grey),
+          prefixIcon: Icon(data, color: Colors.blueAccent),
           hintText: txtHint,
-          hintStyle: subTitleStyle,
+          hintStyle: subTitleStyle.copyWith(color: Colors.grey.shade400),
         ),
       ),
     );

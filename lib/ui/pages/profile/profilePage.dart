@@ -6,6 +6,7 @@ import 'package:glucose_real_time/ui/theme/theme.dart';
 import 'package:glucose_real_time/ui/widgets/common_appbar.dart';
 import 'package:glucose_real_time/ui/widgets/button.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:glucose_real_time/ui/pages/profile/viewProfile.dart';
 
 import 'UpdateProfileScreen.dart';
@@ -19,19 +20,36 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final NotifyHelper notifyHelper = NotifyHelper();
+  late SharedPreferences _sharedPreferences;
 
   // Placeholder cho tên và ID thiết bị (có thể set sau từ Node.js hoặc phía logic)
   String? savedDeviceName;
   String? savedDeviceId;
 
   // Tên người dùng hiện tại
-  String userName = "Nguyen Dung";
+  String userName = "User"; // Default name
   String avatarPath = "assets/images/profile/avatar.jpg";
 
   // Thông tin cơ thể người dùng
   double height = 170.0;  // Chiều cao mặc định (cm)
   double weight = 65.0;   // Cân nặng mặc định (kg)
   int age = 25;          // Tuổi mặc định
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    _sharedPreferences = await SharedPreferences.getInstance();
+    setState(() {
+      userName = _sharedPreferences.getString('username') ?? "User";
+      height = _sharedPreferences.getDouble('height') ?? 170.0;
+      weight = _sharedPreferences.getDouble('weight') ?? 65.0;
+      age = _sharedPreferences.getInt('age') ?? 25;
+    });
+  }
 
   // Hàm cập nhật chiều cao
   void _updateHeight() {

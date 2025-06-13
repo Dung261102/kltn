@@ -57,9 +57,9 @@ class MyApp extends StatelessWidget {
         // "/": (context) => CheckLoginPage(), // Trang kiểm tra login đầu tiên
         // "/main": (context) => MainPage(), // Trang chính của app
         // "/login": (context) => LoginPage(),
-        "/": (context) => LoginPage(),
+        // "/": (context) => LoginPage(),
         // "/home": (context) => HomePage(),
-        //  "/": (context) => MainPage(),
+         "/": (context) => MainPage(),
       },
 
       // home: ReminderPage(), // màn hình đầu tiên

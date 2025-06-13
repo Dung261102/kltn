@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../rest/rest_api.dart'; // Gọi API đăng ký
 import 'login_page.dart';            // Trang đăng nhập
+import '../../widgets/form_fields_widgets.dart'; // Import FormFields widget
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -20,134 +22,180 @@ class RegisterPageState extends State<RegisterPage> {
   final TextEditingController address = TextEditingController();
   final TextEditingController password = TextEditingController();
   final TextEditingController confirmPassword = TextEditingController();
+  final TextEditingController height = TextEditingController();
+  final TextEditingController weight = TextEditingController();
+  final TextEditingController age = TextEditingController();
+  late SharedPreferences _sharedPreferences;
 
   // Key để validate form
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
+  void initState() {
+    super.initState();
+    _initSharedPreferences();
+  }
+
+  Future<void> _initSharedPreferences() async {
+    _sharedPreferences = await SharedPreferences.getInstance();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[300], // Nền toàn màn hình
+      backgroundColor: Colors.white, // Changed from grey to white
       body: Center(
-        child: Container(
-          padding: EdgeInsets.all(30),
-          margin: EdgeInsets.symmetric(horizontal: 25),
-          decoration: BoxDecoration(
-            color: Colors.white, // Giao diện form nền trắng
-            borderRadius: BorderRadius.circular(15),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 10,
-                offset: Offset(0, 5),
-              ),
-            ],
-          ),
-          child: SingleChildScrollView(
-            child: Form(
-              key: _formKey, // Form validation
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "Create Account",
-                    style: TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blueAccent,
-                    ),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(25),
+          child: Form(
+            key: _formKey, // Form validation
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Create Account",
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueAccent,
                   ),
-                  SizedBox(height: 25),
+                ),
+                SizedBox(height: 25),
 
-                  _buildField(email, Icons.email, 'Email'),
-                  _buildField(username, Icons.person, 'Username'),
-                  _buildField(dob, Icons.calendar_today, 'Date of Birth'),
-                  _buildField(phone, Icons.phone, 'Phone'),
-                  _buildField(address, Icons.home, 'Address'),
-                  _buildField(password, Icons.lock, 'Password', isPassword: true),
-                  _buildField(confirmPassword, Icons.lock_outline, 'Confirm Password', isPassword: true),
+                FormFields(
+                  controller: email,
+                  data: Icons.email,
+                  txtHint: 'Email',
+                  obsecure: false,
+                ),
+                FormFields(
+                  controller: username,
+                  data: Icons.person,
+                  txtHint: 'Username',
+                  obsecure: false,
+                ),
+                FormFields(
+                  controller: dob,
+                  data: Icons.calendar_today,
+                  txtHint: 'Date of Birth',
+                  obsecure: false,
+                ),
+                FormFields(
+                  controller: phone,
+                  data: Icons.phone,
+                  txtHint: 'Phone',
+                  obsecure: false,
+                ),
+                FormFields(
+                  controller: address,
+                  data: Icons.home,
+                  txtHint: 'Address',
+                  obsecure: false,
+                ),
+                FormFields(
+                  controller: height,
+                  data: Icons.height,
+                  txtHint: 'Height (cm)',
+                  obsecure: false,
+                ),
+                FormFields(
+                  controller: weight,
+                  data: Icons.monitor_weight,
+                  txtHint: 'Weight (kg)',
+                  obsecure: false,
+                ),
+                FormFields(
+                  controller: age,
+                  data: Icons.person_outline,
+                  txtHint: 'Age',
+                  obsecure: false,
+                ),
+                FormFields(
+                  controller: password,
+                  data: Icons.lock,
+                  txtHint: 'Password',
+                  obsecure: true,
+                ),
+                FormFields(
+                  controller: confirmPassword,
+                  data: Icons.lock_outline,
+                  txtHint: 'Confirm Password',
+                  obsecure: true,
+                ),
 
-                  SizedBox(height: 20),
+                SizedBox(height: 20),
 
-                  ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        if (password.text != confirmPassword.text) {
-                          Fluttertoast.showToast(
-                            msg: "Passwords do not match",
-                            textColor: Colors.red,
-                          );
-                          return;
-                        }
-
-                        // Gọi API đăng ký
-                        doRegister(
-                          username.text,
-                          email.text,
-                          password.text,
-                          phone.text,
-                          dob.text,
-                          address.text,
+                ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      if (password.text != confirmPassword.text) {
+                        Fluttertoast.showToast(
+                          msg: "Passwords do not match",
+                          textColor: Colors.red,
                         );
+                        return;
                       }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                    ),
-                    child: Text(
-                      "Register",
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                  ),
 
-                  SizedBox(height: 20),
-
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => LoginPage()),
+                      // Gọi API đăng ký
+                      doRegister(
+                        username.text,
+                        email.text,
+                        password.text,
+                        phone.text,
+                        dob.text,
+                        address.text,
                       );
-                    },
-                    child: Text(
-                      "Already have an account? Login",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.blueAccent,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                ],
-              ),
+                  child: Text(
+                    "Register",
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+
+                SizedBox(height: 20),
+
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => LoginPage()),
+                    );
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Already have an account? ",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(width: 5),
+                      Text(
+                        "Login",
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.blueAccent,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  // Widget xây dựng các trường nhập liệu
-  Widget _buildField(TextEditingController controller, IconData icon, String hint, {bool isPassword = false}) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 15),
-      child: TextFormField(
-        controller: controller,
-        obscureText: isPassword,
-        decoration: InputDecoration(
-          prefixIcon: Icon(icon),
-          hintText: hint,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          filled: true,
-          fillColor: Colors.grey[100],
-        ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return '$hint is required';
-          }
-          return null;
-        },
       ),
     );
   }
@@ -161,9 +209,15 @@ class RegisterPageState extends State<RegisterPage> {
       String dob,
       String address,
   ) async {
-    var res = await userRegister(username, email, password, phone, dob, address); // Gọi API
+    var res = await userRegister(username, email, password, phone, dob, address);
 
     if (res['success']) {
+      // Save username and body information to SharedPreferences
+      await _sharedPreferences.setString('username', username);
+      await _sharedPreferences.setDouble('height', double.parse(height.text));
+      await _sharedPreferences.setDouble('weight', double.parse(weight.text));
+      await _sharedPreferences.setInt('age', int.parse(age.text));
+      
       Fluttertoast.showToast(msg: 'Registration successful', textColor: Colors.green);
       Navigator.pushReplacement(
         context,
