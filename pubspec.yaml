@@ -64,6 +64,7 @@ dependencies:
   http: ^1.4.0
   sqflite_common_ffi: ^2.3.6
   device_info_plus: ^11.4.0
+  fl_chart: ^1.0.0
 
 
 
