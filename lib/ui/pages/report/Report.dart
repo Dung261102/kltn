@@ -5,28 +5,33 @@ import '../../../services/notification_services.dart';
 import '../../widgets/LineChart.dart';
 import '../../widgets/common_appbar.dart';
 
-class ReportPage extends StatelessWidget {
-  final ValueNotifier<int> selectedIndex = ValueNotifier<int>(0);
+class ReportPage extends StatefulWidget {
+  const ReportPage({super.key});
 
-  ReportPage({super.key});
+  @override
+  State<ReportPage> createState() => _ReportPageState();
+}
+
+class _ReportPageState extends State<ReportPage> {
+  final ValueNotifier<int> selectedIndex = ValueNotifier<int>(0);
+  final NotifyHelper notifyHelper = NotifyHelper();
+
+  // Tạo dữ liệu mẫu cho biểu đồ
+  List<FlSpot> glucoseData = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Gán dữ liệu mẫu nếu cần
+    glucoseData = List.generate(
+      7,
+          (index) => FlSpot(index.toDouble(), 80 + index * 10),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final NotifyHelper notifyHelper = NotifyHelper();
-
-    final List<FlSpot> glucoseData = [
-      FlSpot(0, 100),
-      FlSpot(1, 85),
-      FlSpot(2, 120),
-      FlSpot(3, 110),
-      FlSpot(4, 140),
-      FlSpot(5, 105),
-      FlSpot(6, 130),
-      FlSpot(7, 125),
-      FlSpot(8, 100),
-      FlSpot(9, 115),
-    ];
-
     final DateTime lastUpdateTime = DateTime.now();
 
     return Scaffold(

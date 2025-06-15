@@ -109,12 +109,14 @@
 //   }
 // }
 
-import 'package:fl_chart/fl_chart.dart';
+import 'package:fl_chart/fl_chart.dart'; // Thư viện để vẽ biểu đồ dạng đường (line chart)
 import 'package:flutter/material.dart';
+import 'package:glucose_real_time/ui/theme/theme.dart'; // Thư viện giao diện của bạn, chứa headingStyle
 
+// Widget biểu đồ đường thể hiện dữ liệu glucose
 class GlucoseLineChart extends StatelessWidget {
-  final List<FlSpot> glucoseData;
-  final DateTime lastUpdateTime;
+  final List<FlSpot> glucoseData; // Danh sách các điểm dữ liệu glucose (x: thời gian, y: chỉ số)
+  final DateTime lastUpdateTime; // Thời gian cập nhật cuối cùng để tính lại mốc thời gian trên trục X
 
   const GlucoseLineChart({
     Key? key,
@@ -125,89 +127,126 @@ class GlucoseLineChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 300,
-      padding: const EdgeInsets.all(15),
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      height: 300, // Chiều cao của biểu đồ
+      padding: const EdgeInsets.all(15), // Padding bên trong biểu đồ
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), // Khoảng cách với bên ngoài
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(35),
+        color: Colors.white, // Màu nền trắng
+        borderRadius: BorderRadius.circular(35), // Bo tròn góc
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
+            color: Colors.grey.withOpacity(0.3), // Đổ bóng màu xám nhạt
             blurRadius: 7,
-            offset: const Offset(2, 5),
+            offset: const Offset(2, 5), // Độ lệch của bóng đổ
           ),
         ],
       ),
-      child: LineChart(
-        LineChartData(
-          gridData: FlGridData(show: true),
-          borderData: FlBorderData(
-            show: true,
-            border: const Border(
-              left: BorderSide(),
-              bottom: BorderSide(),
-            ),
-          ),
-          titlesData: FlTitlesData(
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: true, interval: 20, reservedSize: 40),
-            ),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                interval: 1,
-                getTitlesWidget: (value, meta) {
-                  if (value.toInt() >= glucoseData.length) return const Text('');
-                  final time = lastUpdateTime.subtract(
-                    Duration(minutes: (glucoseData.length - 1 - value.toInt()) * 5),
-                  );
-                  return Text(
-                    '${time.hour}:${time.minute.toString().padLeft(2, '0')}',
-                    style: const TextStyle(fontSize: 10),
-                  );
-                },
+
+      // Dùng Column để chứa cả tiêu đề và biểu đồ
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Tiêu đề "Health Report"
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Health Report",
+                style: headingStyle, // Kiểu chữ từ theme tùy chỉnh
               ),
-            ),
-          ),
-          minY: 60,
-          maxY: 200,
-          lineBarsData: [
-            LineChartBarData(
-              spots: glucoseData,
-              isCurved: true,
-              color: Colors.teal,
-              barWidth: 3,
-              belowBarData: BarAreaData(
-                show: true,
-                color: Colors.teal.withOpacity(0.2),
-              ),
-              dotData: FlDotData(show: true),
-            ),
-          ],
-          lineTouchData: LineTouchData(
-            enabled: true,
-            touchTooltipData: LineTouchTooltipData(
-              getTooltipItems: (touchedSpots) {
-                return touchedSpots.map((spot) {
-                  return LineTooltipItem(
-                    '${spot.y.toInt()} mg/dL',
-                    const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  );
-                }).toList();
-              },
-            ),
-          ),
-          extraLinesData: ExtraLinesData(
-            horizontalLines: [
-              HorizontalLine(y: 70, color: Colors.orange, strokeWidth: 2, dashArray: [5, 5]),
-              HorizontalLine(y: 180, color: Colors.red, strokeWidth: 2, dashArray: [5, 5]),
             ],
           ),
-        ),
+
+          const SizedBox(height: 15), // Khoảng cách giữa tiêu đề và biểu đồ
+
+          // Biểu đồ glucose
+          Expanded(
+            child: LineChart(
+              LineChartData(
+                gridData: FlGridData(show: true), // Hiển thị lưới
+                borderData: FlBorderData(
+                  show: true,
+                  border: const Border(
+                    left: BorderSide(),
+                    bottom: BorderSide(),
+                  ),
+                ),
+                titlesData: FlTitlesData(
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      interval: 50,
+                      reservedSize: 40,
+                    ),
+                  ),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      interval: 1,
+                      getTitlesWidget: (value, meta) {
+                        if (value.toInt() >= glucoseData.length) return const Text('');
+                        final time = lastUpdateTime.subtract(
+                          Duration(minutes: (glucoseData.length - 1 - value.toInt()) * 30),
+                        );
+                        return Text(
+                          '${time.hour}:${time.minute.toString().padLeft(2, '0')}',
+                          style: const TextStyle(fontSize: 10),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                minY: 60,
+                maxY: 200,
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: glucoseData,
+                    isCurved: true,
+                    color: Colors.teal,
+                    barWidth: 3,
+                    belowBarData: BarAreaData(
+                      show: true,
+                      color: Colors.teal.withOpacity(0.2),
+                    ),
+                    dotData: FlDotData(show: true),
+                  ),
+                ],
+                lineTouchData: LineTouchData(
+                  enabled: true,
+                  touchTooltipData: LineTouchTooltipData(
+                    getTooltipItems: (touchedSpots) {
+                      return touchedSpots.map((spot) {
+                        return LineTooltipItem(
+                          '${spot.y.toInt()} mg/dL',
+                          const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        );
+                      }).toList();
+                    },
+                  ),
+                ),
+                extraLinesData: ExtraLinesData(
+                  horizontalLines: [
+                    HorizontalLine(
+                      y: 70,
+                      color: Colors.orange,
+                      strokeWidth: 2,
+                      dashArray: [5, 5],
+                    ),
+                    HorizontalLine(
+                      y: 180,
+                      color: Colors.red,
+                      strokeWidth: 2,
+                      dashArray: [5, 5],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
