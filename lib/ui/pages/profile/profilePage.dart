@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:glucose_real_time/ui/pages/profile/viewProfile.dart';
 
 import 'UpdateProfileScreen.dart';
+import 'ble.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -163,9 +164,9 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   // Hàm gọi UI chọn thiết bị - logic sẽ xử lý sau
-  void _onAddDevicePressed() {
-    // TODO: Gắn kết với logic tìm và kết nối thiết bị (Node.js hoặc logic Flutter riêng)
-  }
+  // void _onAddDevicePressed() {
+  //   // TODO: Gắn kết với logic tìm và kết nối thiết bị (Node.js hoặc logic Flutter riêng)
+  // }
 
   // Hàm gọi khi người dùng xoá thiết bị - xử lý sau
   void _onClearDevicePressed() {
@@ -201,7 +202,11 @@ class _ProfilePageState extends State<ProfilePage> {
     return Column(
       children: [
         ElevatedButton(
-          onPressed: _onAddDevicePressed,
+          // onPressed: _onAddDevicePressed,
+          onPressed: () {
+            Get.to(() => BleView(
+            ));
+          },
           child: const Text("Add Device"),
         ),
         if (savedDeviceName != null && savedDeviceId != null) ...[
