@@ -4,6 +4,8 @@ import 'package:glucose_real_time/ui/theme/theme.dart';
 import '../../../services/notification_services.dart';
 import '../../widgets/LineChart.dart';
 import '../../widgets/common_appbar.dart';
+import 'package:get/get.dart';
+import 'package:glucose_real_time/controllers/ble_controller.dart';
 
 class ReportPage extends StatefulWidget {
   const ReportPage({super.key});
@@ -13,43 +15,56 @@ class ReportPage extends StatefulWidget {
 }
 
 class _ReportPageState extends State<ReportPage> {
-  final ValueNotifier<int> selectedIndex = ValueNotifier<int>(0);
+  final BleController bleController = Get.put(BleController());
   final NotifyHelper notifyHelper = NotifyHelper();
+  final ValueNotifier<int> selectedIndex = ValueNotifier<int>(0);
 
-  // Tạo dữ liệu mẫu cho biểu đồ
-  List<FlSpot> glucoseData = [];
+  List<int> _todayGlucoseValues() {
+    final now = DateTime.now();
+    return bleController.glucoseHistory
+        .where((e) => e.time.year == now.year && e.time.month == now.month && e.time.day == now.day)
+        .map((e) => e.value)
+        .toList();
+  }
 
-  @override
-  void initState() {
-    super.initState();
+  int? _todayMaxGlucose() {
+    final values = _todayGlucoseValues();
+    if (values.isEmpty) return null;
+    return values.reduce((a, b) => a > b ? a : b);
+  }
 
-    // Gán dữ liệu mẫu nếu cần
-    glucoseData = List.generate(
-      7,
-          (index) => FlSpot(index.toDouble(), 80 + index * 10),
-    );
+  double? _todayAvgGlucose() {
+    final values = _todayGlucoseValues();
+    if (values.isEmpty) return null;
+    return values.reduce((a, b) => a + b) / values.length;
   }
 
   @override
   Widget build(BuildContext context) {
-    final DateTime lastUpdateTime = DateTime.now();
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: CommonAppBar(notifyHelper: notifyHelper),
-      body: ListView(
-        padding: const EdgeInsets.only(top: 10),
-        children: [
-          _buildDateSelector(),
-          GlucoseLineChart(
-            glucoseData: glucoseData,
-            lastUpdateTime: lastUpdateTime,
-          ),
-          _buildGlucoseMetrics(),
-          _buildTodaySection(),
-          _buildDoctorReports(),
-        ],
-      ),
+      body: Obx(() {
+        final history = bleController.glucoseHistory;
+        final glucoseData = List<FlSpot>.generate(
+          history.length,
+              (i) => FlSpot(i.toDouble(), history[i].value.toDouble()),
+        );
+        final lastUpdateTime = history.isNotEmpty ? history.first.time : DateTime.now();
+        return ListView(
+          padding: const EdgeInsets.only(top: 10),
+          children: [
+            _buildDateSelector(),
+            GlucoseLineChart(
+              glucoseData: glucoseData,
+              lastUpdateTime: lastUpdateTime,
+            ),
+            _buildGlucoseMetrics(),
+            _buildTodaySection(),
+            _buildDoctorReports(),
+          ],
+        );
+      }),
     );
   }
 
@@ -98,6 +113,8 @@ class _ReportPageState extends State<ReportPage> {
   }
 
   Widget _buildGlucoseMetrics() {
+    final avg = _todayAvgGlucose();
+    final max = _todayMaxGlucose();
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
@@ -106,12 +123,12 @@ class _ReportPageState extends State<ReportPage> {
           _buildMetricCard(
             icon: Icons.bloodtype,
             label: "Average",
-            value: "110 mg/dL",
+            value: avg != null ? "${avg.toStringAsFixed(1)} mg/dL" : "-",
           ),
           _buildMetricCard(
             icon: Icons.bloodtype,
             label: "Maximum",
-            value: "140 mg/dL",
+            value: max != null ? "$max mg/dL" : "-",
           ),
         ],
       ),

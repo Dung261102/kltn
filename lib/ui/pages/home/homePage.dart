@@ -1,20 +1,17 @@
 // Các thư viện cần thiết
-import 'package:flutter/material.dart';
-import 'package:glucose_real_time/ui/theme/theme.dart'; // Giao diện tuỳ chỉnh
-import '../../../services/notification_services.dart'; // Thông báo push
-import '../../widgets/LineChart.dart'; // Widget biểu đồ (nếu dùng riêng)
-import '../../widgets/common_appbar.dart'; // AppBar dùng chung
-import 'package:fl_chart/fl_chart.dart'; // Thư viện vẽ biểu đồ
-import 'dart:math'; // Để tạo dữ liệu giả ngẫu nhiên
-import 'dart:async'; // Dùng trong async nếu cần
+import 'package:flutter/material.dart'; // Thư viện UI chính của Flutter
+import 'package:glucose_real_time/ui/theme/theme.dart'; // Tuỳ chỉnh giao diện app
+import '../../../services/notification_services.dart'; // Dịch vụ gửi thông báo
+import '../../widgets/LineChart.dart'; // Biểu đồ tuyến hiển thị glucose
+import '../../widgets/common_appbar.dart'; // AppBar dùng chung cho các màn hình
+import 'package:fl_chart/fl_chart.dart'; // Thư viện vẽ biểu đồ tuỳ chỉnh
+import 'dart:math'; // Hỗ trợ tạo dữ liệu ngẫu nhiên
+import 'dart:async'; // Cho các thao tác bất đồng bộ nếu cần
+import 'package:get/get.dart';
+import 'package:glucose_real_time/controllers/ble_controller.dart';
 
-// Định nghĩa kiểu dữ liệu lịch sử
-class GlucoseRecord {
-  final DateTime time;
-  final int value;
-
-  GlucoseRecord({required this.time, required this.value});
-}
+// Định nghĩa kiểu dữ liệu đơn giản để lưu lịch sử đo đường huyết
+typedef GlucoseRecord = ({DateTime time, int value});
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -24,55 +21,15 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int? glucoseValue;
-  bool isConnected = false;
-  List<FlSpot> glucoseData = [];
-  DateTime lastUpdateTime = DateTime.now();
-  final Random _random = Random();
-  List<GlucoseRecord> history = [];
+  final BleController bleController = Get.put(BleController());
+  RxBool isMeasuring = false.obs;
 
   @override
   void initState() {
     super.initState();
-    _initializeSampleData();
   }
 
-  void _initializeSampleData() {
-    final now = DateTime.now();
-    glucoseData = List.generate(5, (index) {
-      final time = now.subtract(Duration(minutes: (4 - index) * 5));
-      final value = 80 + _random.nextInt(60);
-      history.add(GlucoseRecord(time: time, value: value));
-      return FlSpot(index.toDouble(), value.toDouble());
-    });
-    glucoseValue = glucoseData.last.y.toInt();
-    lastUpdateTime = now;
-  }
-
-  void _connectToDevice() async {
-    setState(() {
-      isConnected = true;
-    });
-  }
-
-  void _disconnectFromDevice() async {
-    setState(() {
-      isConnected = false;
-      glucoseValue = null;
-    });
-  }
-
-  void updateGlucoseReading(int newValue) {
-    setState(() {
-      final now = DateTime.now();
-      glucoseData.add(FlSpot(glucoseData.length.toDouble(), newValue.toDouble()));
-      glucoseValue = newValue;
-      lastUpdateTime = now;
-      history.insert(0, GlucoseRecord(time: now, value: newValue));
-      print('New glucose reading: $newValue mg/dL at ${_formatTime(now)}');
-    });
-  }
-
+  // Đánh giá trạng thái đường huyết theo ngưỡng thông thường
   String getGlucoseStatus(int value) {
     if (value < 70) return "🟡 Low";
     if (value > 180) return "🔴 High";
@@ -86,28 +43,51 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final NotifyHelper notifyHelper = NotifyHelper();
-    final int displayValue = glucoseValue ?? 0;
-
     return Scaffold(
       appBar: CommonAppBar(
         notifyHelper: notifyHelper,
       ),
-      body: ListView(
-        children: [
-          GlucoseLineChart( // Gọi widget đã tách riêng
-            glucoseData: glucoseData,
-            lastUpdateTime: lastUpdateTime,
-          ),
-          _buildGlucoseDisplay(displayValue),
-          _buildBLEConnectionButton(),
-          _buildHistoryList(),
-        ],
-      ),
+      body: Obx(() {
+        final history = bleController.glucoseHistory;
+        final glucoseData = List<FlSpot>.generate(
+          history.length,
+              (i) => FlSpot(i.toDouble(), history[i].value.toDouble()),
+        );
+        final displayValue = history.isNotEmpty ? history.first.value : 0;
+        final lastUpdateTime = history.isNotEmpty ? history.first.time : DateTime.now();
+        final device = bleController.connectedDevice.value;
+        final isConnected = device != null;
+        return ListView(
+          children: [
+            GlucoseLineChart(
+              glucoseData: glucoseData,
+              lastUpdateTime: lastUpdateTime,
+            ),
+            _buildGlucoseDisplay(displayValue, isConnected, device?.name ?? ''),
+            if (isConnected)
+              Obx(() => ElevatedButton.icon(
+                onPressed: isMeasuring.value ? null : () async {
+                  isMeasuring.value = true;
+                  await bleController.doMeasureGlucose();
+                  isMeasuring.value = false;
+                },
+                icon: isMeasuring.value
+                    ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : Icon(Icons.bloodtype),
+                label: Text(isMeasuring.value ? 'Đang đo...' : 'Đo Glucose'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  minimumSize: const Size(double.infinity, 50),
+                ),
+              )),
+            _buildHistoryList(history),
+          ],
+        );
+      }),
     );
   }
 
-
-  Widget _buildGlucoseDisplay(int displayValue) {
+  Widget _buildGlucoseDisplay(int displayValue, bool isConnected, String deviceName) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Container(
@@ -165,7 +145,7 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 5),
             Text(
               isConnected
-                  ? 'Last measurement: ${_formatTime(lastUpdateTime)}'
+                  ? 'Connected: $deviceName'
                   : 'Not connected to device',
               style: TextStyle(
                 fontSize: 12,
@@ -178,22 +158,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildBLEConnectionButton() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: ElevatedButton.icon(
-        onPressed: isConnected ? _disconnectFromDevice : _connectToDevice,
-        icon: Icon(isConnected ? Icons.bluetooth_connected : Icons.bluetooth),
-        label: Text(isConnected ? 'Disconnect Device' : 'Connect BLE Device'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: isConnected ? Colors.green : Colors.blue,
-          minimumSize: const Size(double.infinity, 50),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHistoryList() {
+  // Sửa lại để nhận history từ controller
+  Widget _buildHistoryList(List<({DateTime time, int value})> history) {
     if (history.isEmpty) {
       return const Padding(
         padding: EdgeInsets.all(20.0),
@@ -204,7 +170,6 @@ class _HomePageState extends State<HomePage> {
         ),
       );
     }
-
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Column(

@@ -3,23 +3,27 @@ import 'package:get/get.dart';
 import '../../../controllers/ble_controller.dart';
 
 class BleView extends StatelessWidget {
+  // Tạo và đăng ký controller BLE với GetX để quản lý trạng thái toàn cục
   final BleController controller = Get.put(BleController());
+  // Trạng thái cho biết có hiển thị danh sách dịch vụ không
   final RxBool showServices = false.obs;
+  // Trạng thái cho biết có đang quét BLE không
   final RxBool isScanning = false.obs;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Thiết bị BLE gần đây"),
+        title: Text("Thiết bị BLE gần đây"), // Tiêu đề thanh điều hướng
         centerTitle: true,
       ),
       body: Column(
         children: [
-          // Nút quét thiết bị
+          // Nút để bắt đầu quá trình quét thiết bị BLE
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: ElevatedButton.icon(
+              // Hiển thị loading nếu đang quét, icon tìm kiếm nếu không
               icon: Obx(() => isScanning.value
                   ? SizedBox(
                 height: 20,
@@ -28,8 +32,10 @@ class BleView extends StatelessWidget {
                     strokeWidth: 2, color: Colors.white),
               )
                   : Icon(Icons.search)),
+              // Hiển thị văn bản theo trạng thái quét
               label: Obx(() =>
                   Text(isScanning.value ? "Đang quét..." : "Quét thiết bị")),
+              // Hành động khi nhấn nút: bắt đầu quét, sau 16s thì tắt
               onPressed: () async {
                 isScanning.value = true;
                 await controller.scanDevices();
@@ -42,21 +48,22 @@ class BleView extends StatelessWidget {
             ),
           ),
 
-          // Thông tin thiết bị đã kết nối
+          // Nếu có thiết bị đang kết nối thì hiển thị thông tin thiết bị đó
           Obx(() {
             final device = controller.connectedDevice.value;
-            if (device == null) return SizedBox.shrink();
+            if (device == null) return SizedBox.shrink(); // Không có thì ẩn
 
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               child: Card(
-                color: Colors.green[50],
+                color: Colors.green[50], // Nền nhẹ nhàng cho phần thiết bị kết nối
                 child: ListTile(
                   title: Text("Đang kết nối với: ${device.name}"),
                   subtitle: Text("ID: ${device.id.id}"),
                   trailing: Wrap(
                     spacing: 8,
                     children: [
+                      // Nút để hiển thị các dịch vụ của thiết bị
                       ElevatedButton(
                         onPressed: () async {
                           await controller.discoverServices(device);
@@ -64,6 +71,7 @@ class BleView extends StatelessWidget {
                         },
                         child: Text("Hiển thị dịch vụ"),
                       ),
+                      // Nút để ngắt kết nối
                       ElevatedButton(
                         onPressed: () {
                           controller.disconnectDevice();
@@ -80,7 +88,7 @@ class BleView extends StatelessWidget {
             );
           }),
 
-          // Danh sách thiết bị quét được
+          // Danh sách các thiết bị BLE được quét
           Expanded(
             child: Obx(() {
               final devices = controller.scannedDevices;
@@ -106,17 +114,17 @@ class BleView extends StatelessWidget {
                       title: Text(
                         device.name.isNotEmpty
                             ? device.name
-                            : "Không có tên",
+                            : "Không có tên", // Nếu thiết bị không có tên thì hiển thị thông báo
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       subtitle:
-                      Text("ID: ${device.id.id}\nRSSI: ${result.rssi}"),
+                      Text("ID: ${device.id.id}\nRSSI: ${result.rssi}"), // Hiển thị ID và độ mạnh tín hiệu
                       isThreeLine: true,
                       trailing: ElevatedButton(
                         child: Text("Kết nối"),
                         onPressed: () async {
-                          showServices.value = false;
-                          await controller.connectToDevice(device);
+                          showServices.value = false; // Ẩn danh sách service cũ nếu có
+                          await controller.connectToDevice(device); // Gọi kết nối đến thiết bị được chọn
                         },
                       ),
                     ),
@@ -126,14 +134,14 @@ class BleView extends StatelessWidget {
             }),
           ),
 
-          // Hiển thị danh sách dịch vụ đã khám phá
+          // Hiển thị danh sách các dịch vụ BLE đã khám phá từ thiết bị
           Obx(() {
             final services = controller.discoveredServices;
             if (!showServices.value || services.isEmpty)
-              return SizedBox.shrink();
+              return SizedBox.shrink(); // Nếu chưa kết nối hoặc chưa có service thì không hiển thị
 
             return SizedBox(
-              height: 250, // 👈 Chỉ định chiều cao cố định để tránh overflow
+              height: 250, // 👈 Giới hạn chiều cao để tránh tràn màn hình
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: ListView.builder(
@@ -143,7 +151,7 @@ class BleView extends StatelessWidget {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("🧪 Service: ${service.uuid}"),
+                        Text("🧪 Service: ${service.uuid}"), // Hiển thị UUID của service
                         ...service.characteristics.map(
                               (c) => Padding(
                             padding:
@@ -151,7 +159,7 @@ class BleView extends StatelessWidget {
                             child: Text(
                                 "🔹 Characteristic: ${c.uuid} | properties: ${c.properties}"),
                           ),
-                        ),
+                        ), // Lặp và hiển thị các đặc tính của service
                         SizedBox(height: 8),
                       ],
                     );

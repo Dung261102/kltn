@@ -7,10 +7,14 @@ import 'package:glucose_real_time/ui/widgets/common_appbar.dart';
 import 'package:glucose_real_time/ui/widgets/button.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
+import 'dart:convert';
+import 'dart:typed_data';
 // import 'package:glucose_real_time/ui/pages/profile/viewProfile.dart';
 
 import 'UpdateProfileScreen.dart';
 import 'ble.dart';
+import 'package:glucose_real_time/controllers/ble_controller.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -22,14 +26,12 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final NotifyHelper notifyHelper = NotifyHelper();
   late SharedPreferences _sharedPreferences;
-
-  // Placeholder cho tên và ID thiết bị (có thể set sau từ Node.js hoặc phía logic)
-  String? savedDeviceName;
-  String? savedDeviceId;
+  final BleController bleController = Get.put(BleController());
 
   // Tên người dùng hiện tại
   String userName = "User"; // Default name
   String avatarPath = "assets/images/profile/avatar.jpg";
+  Uint8List? avatarBytes; // Thêm biến này để lưu avatar base64 (web)
 
   // Thông tin cơ thể người dùng
   double height = 170.0;  // Chiều cao mặc định (cm)
@@ -40,6 +42,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     _loadUserData();
+    _loadAvatar();
   }
 
   Future<void> _loadUserData() async {
@@ -50,6 +53,28 @@ class _ProfilePageState extends State<ProfilePage> {
       weight = _sharedPreferences.getDouble('weight') ?? 65.0;
       age = _sharedPreferences.getInt('age') ?? 25;
     });
+  }
+
+  Future<void> _loadAvatar() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedAvatar = prefs.getString('avatar');
+    final base64Str = prefs.getString('avatar_base64');
+    if (base64Str != null && base64Str.isNotEmpty) {
+      setState(() {
+        avatarBytes = base64Decode(base64Str);
+        avatarPath = "";
+      });
+    } else if (savedAvatar != null && savedAvatar.isNotEmpty) {
+      setState(() {
+        avatarPath = savedAvatar;
+        avatarBytes = null;
+      });
+    } else {
+      setState(() {
+        avatarPath = "assets/images/profile/avatar.jpg";
+        avatarBytes = null;
+      });
+    }
   }
 
   // Hàm cập nhật chiều cao
@@ -202,22 +227,28 @@ class _ProfilePageState extends State<ProfilePage> {
     return Column(
       children: [
         ElevatedButton(
-          // onPressed: _onAddDevicePressed,
           onPressed: () {
-            Get.to(() => BleView(
-            ));
+            Get.to(() => BleView());
           },
           child: const Text("Add Device"),
         ),
-        if (savedDeviceName != null && savedDeviceId != null) ...[
-          const SizedBox(height: 10),
-          Text("Thiết bị đã kết nối:", style: Theme.of(context).textTheme.bodyMedium),
-          Text("$savedDeviceName ($savedDeviceId)", style: const TextStyle(color: Colors.blueAccent)),
-          TextButton(
-            onPressed: _onClearDevicePressed,
-            child: const Text("Xoá thiết bị đã lưu", style: TextStyle(color: Colors.red)),
-          ),
-        ],
+        Obx(() {
+          final device = bleController.connectedDevice.value;
+          if (device == null) return SizedBox.shrink();
+          return Column(
+            children: [
+              const SizedBox(height: 10),
+              Text("Thiết bị đã kết nối:", style: Theme.of(context).textTheme.bodyMedium),
+              Text("${device.name} (${device.id.id})", style: const TextStyle(color: Colors.blueAccent)),
+              TextButton(
+                onPressed: () async {
+                  await bleController.disconnectDevice();
+                },
+                child: const Text("Ngắt kết nối thiết bị", style: TextStyle(color: Colors.red)),
+              ),
+            ],
+          );
+        }),
       ],
     );
   }
@@ -238,9 +269,11 @@ class _ProfilePageState extends State<ProfilePage> {
               height: 120,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(100),
-                child: Image(
-                  image: AssetImage(avatarPath),
-                ),
+                child: avatarBytes != null
+                    ? Image.memory(avatarBytes!, fit: BoxFit.cover)
+                    : (avatarPath.startsWith('/')
+                    ? Image.file(File(avatarPath), fit: BoxFit.cover)
+                    : Image.asset(avatarPath)),
               ),
             ),
             Positioned(
@@ -255,7 +288,13 @@ class _ProfilePageState extends State<ProfilePage> {
                       height = result['height'] ?? height;
                       weight = result['weight'] ?? weight;
                       age = result['age'] ?? age;
-                      avatarPath = result['avatar'] ?? avatarPath;
+                      if (result['avatar_base64'] != null && result['avatar_base64'].toString().isNotEmpty) {
+                        avatarBytes = base64Decode(result['avatar_base64']);
+                        avatarPath = "";
+                      } else if (result['avatar'] != null && result['avatar'].toString().isNotEmpty) {
+                        avatarPath = result['avatar'];
+                        avatarBytes = null;
+                      }
                     });
                   }
                 },
@@ -286,21 +325,21 @@ class _ProfilePageState extends State<ProfilePage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             MyButton(
-              label: "$height cm\nHeight",
+              label: "${height} cm\nHeight",
               onTap: () {},
               color: white,
               valueStyle: titleStyle,
               labelStyle: subTitleStyle,
             ),
             MyButton(
-              label: "$weight kg\nWeight",
+              label: "${weight} kg\nWeight",
               onTap: () {},
               color: white,
               valueStyle: titleStyle,
               labelStyle: subTitleStyle,
             ),
             MyButton(
-              label: "$age years\nAge",
+              label: "${age} years\nAge",
               onTap: () {},
               color: white,
               valueStyle: titleStyle,
@@ -316,13 +355,13 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildMenuOptions() {
     return Column(
       children: [
-        
+
         ProfileMenuWidget(
           title: 'Settings',
           icon: LineAwesomeIcons.cog_solid,
           onPress: () {},
         ),
-        
+
         ProfileMenuWidget(
           title: 'Profile',
           icon: LineAwesomeIcons.user,
