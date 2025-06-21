@@ -1,4 +1,5 @@
 // Các thư viện cần thiết
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart'; // Thư viện UI chính của Flutter
 import 'package:glucose_real_time/ui/theme/theme.dart'; // Tuỳ chỉnh giao diện app
 import '../../../services/notification_services.dart'; // Dịch vụ gửi thông báo
@@ -21,13 +22,32 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // final glucoseCollection = FirebaseFirestore.instance.collection('Glucose');
   final BleController bleController = Get.put(BleController());
   RxBool isMeasuring = false.obs;
 
   @override
   void initState() {
     super.initState();
+    getGlucose();
   }
+
+  Future<void> getGlucose() async {
+    final glucoseCollection = FirebaseFirestore.instance.collection('Glucose');
+    final glucoseSnapshot = await glucoseCollection.get();
+
+    for (var doc in glucoseSnapshot.docs) {
+      final data = doc.data(); // data: Map<String, dynamic>
+
+      final Timestamp timestamp = data['Time']; // kiểu Timestamp
+      final DateTime time = timestamp.toDate(); // chuyển sang DateTime
+
+      final int glucose = data['GlucoseData']; // hoặc data['glucoseLevel'] tùy tên field
+
+      print('🩸 Glucose: $glucose mg/dL at $time');
+    }
+  }
+
 
   // Đánh giá trạng thái đường huyết theo ngưỡng thông thường
   String getGlucoseStatus(int value) {
@@ -212,3 +232,5 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
+

@@ -66,6 +66,8 @@ dependencies:
   device_info_plus: ^11.4.0
   fl_chart: ^1.0.0
   flutter_blue_plus: ^1.35.5
+  firebase_core: ^3.14.0
+  cloud_firestore: ^5.6.9
 
 
 
