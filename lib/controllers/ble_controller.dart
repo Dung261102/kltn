@@ -3,6 +3,8 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../rest/rest_api.dart';
+
 class BleController extends GetxController {
   RxList<ScanResult> scannedDevices = <ScanResult>[].obs;
   Rx<BluetoothDevice?> connectedDevice = Rx<BluetoothDevice?>(null);
@@ -154,6 +156,12 @@ class BleController extends GetxController {
                   if (glucose is int) {
                     glucoseHistory.insert(0, (time: DateTime.now(), value: glucose));
                     print("🔔 Glucose mới: $glucose mg/dL");
+
+                    // Gửi lên backend
+                    sendGlucoseDataToBackend(
+                      deviceId: connectedDevice.value?.id.id ?? 'unknown-device',
+                      glucoseValue: glucose,
+                    );
                   } else {
                     print("⚠️ Không tìm thấy hoặc sai kiểu dữ liệu glucose trong JSON");
                   }
