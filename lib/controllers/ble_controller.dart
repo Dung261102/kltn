@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../rest/rest_api.dart';
+import '../services/glucose_service.dart';
 
 class BleController extends GetxController {
   RxList<ScanResult> scannedDevices = <ScanResult>[].obs;
@@ -13,6 +15,8 @@ class BleController extends GetxController {
 
   static const String glucoseServiceUuid = '12345678-1234-5678-1234-56789abcdef0';
   static const String glucoseCharUuid = '12345678-1234-5678-1234-56789abcdef1';
+
+  final GlucoseService _glucoseService = GlucoseService();
 
   @override
   void onInit() {
@@ -31,6 +35,20 @@ class BleController extends GetxController {
         await subscribeGlucoseCharacteristic();
       }
     });
+
+    // Load glucose history khi khởi tạo
+    _loadGlucoseHistory();
+  }
+
+  // Load glucose history từ database
+  Future<void> _loadGlucoseHistory() async {
+    try {
+      final history = await getGlucoseHistory();
+      glucoseHistory.assignAll(history);
+      print('📊 Loaded ${history.length} glucose records from database');
+    } catch (e) {
+      print('❌ Error loading glucose history: $e');
+    }
   }
 
   Future<void> requestPermissions() async {
@@ -53,13 +71,14 @@ class BleController extends GetxController {
 
     scannedDevices.clear();
     print("🔍 Bắt đầu quét thiết bị BLE...");
-    await FlutterBluePlus.startScan(timeout: const Duration(seconds: 15));
+    await FlutterBluePlus.startScan(timeout: const Duration(seconds: 10));
   }
 
   Future<void> connectToDevice(BluetoothDevice device) async {
     try {
       await device.connect(timeout: const Duration(seconds: 15));
       connectedDevice.value = device;
+      await saveConnectedDevice(device);
 
       device.state.listen((state) async {
         if (state == BluetoothDeviceState.connected) {
@@ -133,7 +152,7 @@ class BleController extends GetxController {
               print("🟢 Đang lắng nghe dữ liệu từ BLE...");
 
               // Lắng nghe dữ liệu real-time từ thiết bị
-              characteristic.lastValueStream.listen((value) {
+              characteristic.lastValueStream.listen((value) async {
                 print("📦 Nhận dữ liệu BLE: $value");
 
                 if (value.isEmpty) {
@@ -157,11 +176,14 @@ class BleController extends GetxController {
                     glucoseHistory.insert(0, (time: DateTime.now(), value: glucose));
                     print("🔔 Glucose mới: $glucose mg/dL");
 
-                    // Gửi lên backend
-                    sendGlucoseDataToBackend(
-                      deviceId: connectedDevice.value?.id.id ?? 'unknown-device',
-                      glucoseValue: glucose,
+                    // Lưu dữ liệu vào database local và đồng bộ với server
+                    await _glucoseService.saveGlucoseData(
+                      glucose,
+                      connectedDevice.value?.id.id ?? 'unknown-device',
                     );
+                    
+                    // Refresh glucose history từ database để đảm bảo dữ liệu đồng bộ
+                    await _refreshGlucoseHistory();
                   } else {
                     print("⚠️ Không tìm thấy hoặc sai kiểu dữ liệu glucose trong JSON");
                   }
@@ -182,8 +204,63 @@ class BleController extends GetxController {
     }
   }
 
+  // Lấy dữ liệu glucose từ database
+  Future<List<({DateTime time, int value})>> getGlucoseHistory() async {
+    try {
+      final glucoseDataList = await _glucoseService.getUserGlucoseData();
+      return glucoseDataList.map((data) => (
+        time: data.timestamp,
+        value: data.glucoseValue,
+      )).toList();
+    } catch (e) {
+      print("❌ Error getting glucose history: $e");
+      return [];
+    }
+  }
+
+  // Đồng bộ thủ công
+  Future<void> manualSync() async {
+    await _glucoseService.manualSync();
+  }
 
   Future<void> doMeasureGlucose() async {
     await Future.delayed(const Duration(seconds: 2));
+  }
+
+  // Refresh glucose history từ database
+  Future<void> _refreshGlucoseHistory() async {
+    try {
+      final history = await getGlucoseHistory();
+      glucoseHistory.assignAll(history);
+      print('🔄 Refreshed glucose history: ${history.length} records');
+    } catch (e) {
+      print('❌ Error refreshing glucose history: $e');
+    }
+  }
+
+  Future<void> saveConnectedDevice(BluetoothDevice device) async {
+    final prefs = await SharedPreferences.getInstance();
+    final devices = prefs.getStringList('ble_devices') ?? [];
+    final deviceInfo = '${device.id.id}|${device.name}';
+    if (!devices.contains(deviceInfo)) {
+      devices.add(deviceInfo);
+      await prefs.setStringList('ble_devices', devices);
+    }
+  }
+
+  Future<List<Map<String, String>>> loadConnectedDevices() async {
+    final prefs = await SharedPreferences.getInstance();
+    final devices = prefs.getStringList('ble_devices') ?? [];
+    return devices.map((e) {
+      final parts = e.split('|');
+      return {'id': parts[0], 'name': parts.length > 1 ? parts[1] : ''};
+    }).toList();
+  }
+
+  Future<void> removeConnectedDevice(String deviceId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final devices = prefs.getStringList('ble_devices') ?? [];
+    devices.removeWhere((e) => e.startsWith(deviceId + '|'));
+    await prefs.setStringList('ble_devices', devices);
   }
 }

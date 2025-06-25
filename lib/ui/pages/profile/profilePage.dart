@@ -10,11 +10,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'dart:typed_data';
-// import 'package:glucose_real_time/ui/pages/profile/viewProfile.dart';
+import 'package:glucose_real_time/ui/pages/profile/viewProfile.dart';
 
 import 'UpdateProfileScreen.dart';
 import 'ble.dart';
 import 'package:glucose_real_time/controllers/ble_controller.dart';
+import 'package:glucose_real_time/services/glucose_service.dart';
+import 'dart:async';
+
+import 'package:get_storage/get_storage.dart'; // thư viện lưu trữ biến cục bộ
+import 'package:glucose_real_time/db/db_helper.dart';
+import 'package:glucose_real_time/services/theme_service.dart';
+import 'package:glucose_real_time/ui/pages/login/login_page.dart';
+import 'package:glucose_real_time/ui/theme/test/utils.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:glucose_real_time/controllers/user_controller.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -27,6 +37,8 @@ class _ProfilePageState extends State<ProfilePage> {
   final NotifyHelper notifyHelper = NotifyHelper();
   late SharedPreferences _sharedPreferences;
   final BleController bleController = Get.put(BleController());
+  final GlucoseService _glucoseService = GlucoseService();
+  final UserController userController = Get.put(UserController());
 
   // Tên người dùng hiện tại
   String userName = "User"; // Default name
@@ -34,9 +46,9 @@ class _ProfilePageState extends State<ProfilePage> {
   Uint8List? avatarBytes; // Thêm biến này để lưu avatar base64 (web)
 
   // Thông tin cơ thể người dùng
-  double height = 170.0;  // Chiều cao mặc định (cm)
-  double weight = 65.0;   // Cân nặng mặc định (kg)
-  int age = 25;          // Tuổi mặc định
+  double height = 0.0;  // Chiều cao mặc định (cm)
+  double weight = 0.0;   // Cân nặng mặc định (kg)
+  int age = 0;          // Tuổi mặc định
 
   @override
   void initState() {
@@ -49,10 +61,11 @@ class _ProfilePageState extends State<ProfilePage> {
     _sharedPreferences = await SharedPreferences.getInstance();
     setState(() {
       userName = _sharedPreferences.getString('username') ?? "User";
-      height = _sharedPreferences.getDouble('height') ?? 170.0;
-      weight = _sharedPreferences.getDouble('weight') ?? 65.0;
-      age = _sharedPreferences.getInt('age') ?? 25;
+      height = _sharedPreferences.getDouble('height') ?? 0.0;
+      weight = _sharedPreferences.getDouble('weight') ?? 0.0;
+      age = _sharedPreferences.getInt('age') ?? 0;
     });
+    userController.setUsername(userName);
   }
 
   Future<void> _loadAvatar() async {
@@ -64,16 +77,19 @@ class _ProfilePageState extends State<ProfilePage> {
         avatarBytes = base64Decode(base64Str);
         avatarPath = "";
       });
+      userController.setAvatarBytes(avatarBytes);
     } else if (savedAvatar != null && savedAvatar.isNotEmpty) {
       setState(() {
         avatarPath = savedAvatar;
         avatarBytes = null;
       });
+      userController.setAvatarPath(avatarPath);
     } else {
       setState(() {
         avatarPath = "assets/images/profile/avatar.jpg";
         avatarBytes = null;
       });
+      userController.setAvatarPath(avatarPath);
     }
   }
 
@@ -188,10 +204,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Hàm gọi UI chọn thiết bị - logic sẽ xử lý sau
-  // void _onAddDevicePressed() {
-  //   // TODO: Gắn kết với logic tìm và kết nối thiết bị (Node.js hoặc logic Flutter riêng)
-  // }
+
 
   // Hàm gọi khi người dùng xoá thiết bị - xử lý sau
   void _onClearDevicePressed() {
@@ -238,13 +251,13 @@ class _ProfilePageState extends State<ProfilePage> {
           return Column(
             children: [
               const SizedBox(height: 10),
-              Text("Thiết bị đã kết nối:", style: Theme.of(context).textTheme.bodyMedium),
+              Text("Connected device:", style: Theme.of(context).textTheme.bodyMedium),
               Text("${device.name} (${device.id.id})", style: const TextStyle(color: Colors.blueAccent)),
               TextButton(
                 onPressed: () async {
                   await bleController.disconnectDevice();
                 },
-                child: const Text("Ngắt kết nối thiết bị", style: TextStyle(color: Colors.red)),
+                child: const Text("Disconnect Device", style: TextStyle(color: Colors.red)),
               ),
             ],
           );
@@ -291,11 +304,22 @@ class _ProfilePageState extends State<ProfilePage> {
                       if (result['avatar_base64'] != null && result['avatar_base64'].toString().isNotEmpty) {
                         avatarBytes = base64Decode(result['avatar_base64']);
                         avatarPath = "";
+                        userController.setAvatarBytes(avatarBytes);
                       } else if (result['avatar'] != null && result['avatar'].toString().isNotEmpty) {
                         avatarPath = result['avatar'];
                         avatarBytes = null;
+                        userController.setAvatarPath(avatarPath);
                       }
                     });
+                    if (result['avatar_base64'] != null && result['avatar_base64'].toString().isNotEmpty) {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setString('avatar_base64', result['avatar_base64']);
+                    } else if (result['avatar'] != null && result['avatar'].toString().isNotEmpty) {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setString('avatar', avatarPath);
+                      await prefs.remove('avatar_base64');
+                    }
+                    userController.setUsername(userName);
                   }
                 },
                 child: Container(
@@ -355,24 +379,18 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildMenuOptions() {
     return Column(
       children: [
-
         ProfileMenuWidget(
           title: 'Settings',
           icon: LineAwesomeIcons.cog_solid,
           onPress: () {},
         ),
-
         ProfileMenuWidget(
           title: 'Profile',
           icon: LineAwesomeIcons.user,
           onPress: () {
-
-            // Get.to(() => ViewProfileScreen(
-            // ));
-
+            Get.to(() => ViewProfileScreen());
           },
         ),
-
         ProfileMenuWidget(
           title: 'Privacy Policy',
           icon: LineAwesomeIcons.key_solid,
@@ -389,10 +407,70 @@ class _ProfilePageState extends State<ProfilePage> {
           title: 'Logout',
           icon: LineAwesomeIcons.sign_out_alt_solid,
           textColor: Colors.red,
-          onPress: () {},
+          onPress: () async {
+            bool? shouldLogout = await showDialog<bool>(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Logout'),
+                  content: Text('Are you sure you want to logout?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: Text('Logout'),
+                      style: TextButton.styleFrom(foregroundColor: Colors.red),
+                    ),
+                  ],
+                );
+              },
+            );
+
+            if (shouldLogout == true) {
+              await _performLogout();
+            }
+          },
         ),
       ],
     );
+  }
+
+  Future<void> _performLogout() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      
+      // Chỉ xóa thông tin đăng nhập
+      await prefs.remove('userid');
+      await prefs.remove('usermail');
+      await prefs.remove('username');
+      await prefs.remove('isLoggedIn');
+      
+      // KHÔNG xóa dữ liệu profile và glucose để giữ lại khi login lại
+      // await prefs.remove('height');
+      // await prefs.remove('weight');
+      // await prefs.remove('age');
+      
+      // Hiển thị thông báo
+      Fluttertoast.showToast(
+        msg: 'Logged out successfully. Your data will be preserved.',
+        textColor: Colors.green,
+      );
+      
+      // Chuyển về trang login
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/login',
+        (route) => false, // Xóa tất cả route trong stack
+      );
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: 'Error during logout: $e',
+        textColor: Colors.red,
+      );
+    }
   }
 }
 

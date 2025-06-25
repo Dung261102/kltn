@@ -1,85 +1,199 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/ble_controller.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'dart:ui';
+import 'package:collection/collection.dart';
 
-class BleView extends StatelessWidget {
-  // Tạo và đăng ký controller BLE với GetX để quản lý trạng thái toàn cục
+class BleView extends StatefulWidget {
+  @override
+  State<BleView> createState() => _BleViewState();
+}
+
+class _BleViewState extends State<BleView> {
   final BleController controller = Get.put(BleController());
-  // Trạng thái cho biết có hiển thị danh sách dịch vụ không
   final RxBool showServices = false.obs;
-  // Trạng thái cho biết có đang quét BLE không
   final RxBool isScanning = false.obs;
+  int deviceListKey = 0;
+  bool hasScanned = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Thiết bị BLE gần đây"), // Tiêu đề thanh điều hướng
+        title: Text("Nearby BLE Devices"),
         centerTitle: true,
       ),
       body: Column(
         children: [
+          FutureBuilder<List<Map<String, String>>>(
+            key: ValueKey(deviceListKey),
+            future: controller.loadConnectedDevices(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return SizedBox.shrink();
+              }
+              final devices = snapshot.data!;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Text('Previously Connected Devices:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                  ...devices.map((d) => ListTile(
+                    leading: Icon(Icons.bluetooth),
+                    title: Text(d['name'] ?? ''),
+                    subtitle: Text(d['id'] ?? ''),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ElevatedButton(
+                          child: Text('Connect'),
+                          onPressed: () async {
+                            final scanned = controller.scannedDevices.firstWhereOrNull(
+                              (s) => s.device.id.id == d['id'],
+                            );
+                            if (scanned != null) {
+                              await controller.connectToDevice(scanned.device);
+                            } else {
+                              Get.snackbar('Device not found', 'Please turn on the device and scan again.');
+                            }
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          tooltip: 'Delete',
+                          onPressed: () async {
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text('Delete Device'),
+                                content: Text('Are you sure you want to delete this device from history?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(false),
+                                    child: Text('No'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(true),
+                                    child: Text('Yes'),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (confirm == true) {
+                              await controller.removeConnectedDevice(d['id']!);
+                              setState(() {
+                                deviceListKey++;
+                              });
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  )),
+                  Divider(),
+                ],
+              );
+            },
+          ),
           // Nút để bắt đầu quá trình quét thiết bị BLE
           Padding(
             padding: const EdgeInsets.all(12.0),
-            child: ElevatedButton.icon(
-              // Hiển thị loading nếu đang quét, icon tìm kiếm nếu không
-              icon: Obx(() => isScanning.value
-                  ? SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                    strokeWidth: 2, color: Colors.white),
-              )
-                  : Icon(Icons.search)),
-              // Hiển thị văn bản theo trạng thái quét
-              label: Obx(() =>
-                  Text(isScanning.value ? "Đang quét..." : "Quét thiết bị")),
-              // Hành động khi nhấn nút: bắt đầu quét, sau 16s thì tắt
-              onPressed: () async {
-                isScanning.value = true;
-                await controller.scanDevices();
-                await Future.delayed(Duration(seconds: 16));
-                isScanning.value = false;
-              },
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 24.0),
+            child: Center(
+              child: ElevatedButton.icon(
+                // Hiển thị loading nếu đang quét, icon tìm kiếm nếu không
+                icon: Obx(() => isScanning.value
+                    ? SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Colors.white),
+                )
+                    : Icon(Icons.search)),
+                // Hiển thị văn bản theo trạng thái quét
+                label: Obx(() =>
+                    Text(isScanning.value ? "Scanning..." : "Scan Devices")),
+                // Hành động khi nhấn nút: bắt đầu quét, sau 5s thì tắt
+                onPressed: () async {
+                  setState(() {
+                    isScanning.value = true;
+                    hasScanned = false;
+                  });
+                  await controller.scanDevices();
+                  await Future.delayed(Duration(seconds: 5));
+                  setState(() {
+                    isScanning.value = false;
+                    hasScanned = true;
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 24.0),
+                ),
               ),
             ),
           ),
+          if (!hasScanned && !isScanning.value)
+            Padding(
+              padding: const EdgeInsets.only(top: 16.0),
+              child: Center(
+                child: Text(
+                  'No devices found. Please press Scan Devices.',
+                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                ),
+              ),
+            ),
 
           // Nếu có thiết bị đang kết nối thì hiển thị thông tin thiết bị đó
           Obx(() {
             final device = controller.connectedDevice.value;
-            if (device == null) return SizedBox.shrink(); // Không có thì ẩn
-
+            if (device == null) return SizedBox.shrink();
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: Card(
-                color: Colors.green[50], // Nền nhẹ nhàng cho phần thiết bị kết nối
-                child: ListTile(
-                  title: Text("Đang kết nối với: ${device.name}"),
-                  subtitle: Text("ID: ${device.id.id}"),
-                  trailing: Wrap(
-                    spacing: 8,
+                color: Colors.blue[50],
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Row(
                     children: [
-                      // Nút để hiển thị các dịch vụ của thiết bị
-                      ElevatedButton(
+                      Icon(Icons.bluetooth_connected, color: Colors.blue, size: 32),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              device.name.isNotEmpty ? device.name : "No name",
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.blue[900]),
+                            ),
+                            Text(
+                              "ID: ${device.id.id}",
+                              style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: "Show Services",
+                        icon: Icon(Icons.info_outline, color: Colors.blueAccent),
                         onPressed: () async {
                           await controller.discoverServices(device);
                           showServices.value = true;
                         },
-                        child: Text("Hiển thị dịch vụ"),
                       ),
-                      // Nút để ngắt kết nối
-                      ElevatedButton(
+                      IconButton(
+                        tooltip: "Disconnect",
+                        icon: Icon(Icons.close, color: Colors.red),
                         onPressed: () {
                           controller.disconnectDevice();
                           showServices.value = false;
+                          setState(() {
+                            hasScanned = false;
+                          });
                         },
-                        child: Text("Ngắt kết nối"),
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red),
                       ),
                     ],
                   ),
@@ -89,19 +203,17 @@ class BleView extends StatelessWidget {
           }),
 
           // Danh sách các thiết bị BLE được quét
-          Expanded(
-            child: Obx(() {
-              final devices = controller.scannedDevices;
+          Obx(() {
+            final device = controller.connectedDevice.value;
+            if (device != null || !hasScanned || isScanning.value) return SizedBox.shrink(); // Đã kết nối hoặc chưa scan thì ẩn danh sách quét
+            final devices = controller.scannedDevices;
 
-              if (isScanning.value) {
-                return Center(child: Text("🔍 Đang quét thiết bị..."));
-              }
+            if (devices.isEmpty) {
+              return Center(child: Text("⚠️ No devices found"));
+            }
 
-              if (devices.isEmpty) {
-                return Center(child: Text("⚠️ Không tìm thấy thiết bị nào"));
-              }
-
-              return ListView.builder(
+            return Expanded(
+              child: ListView.builder(
                 itemCount: devices.length,
                 itemBuilder: (context, index) {
                   final result = devices[index];
@@ -114,14 +226,14 @@ class BleView extends StatelessWidget {
                       title: Text(
                         device.name.isNotEmpty
                             ? device.name
-                            : "Không có tên", // Nếu thiết bị không có tên thì hiển thị thông báo
+                            : "No name", // Nếu thiết bị không có tên thì hiển thị thông báo
                         style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                      ),  
                       subtitle:
                       Text("ID: ${device.id.id}\nRSSI: ${result.rssi}"), // Hiển thị ID và độ mạnh tín hiệu
                       isThreeLine: true,
                       trailing: ElevatedButton(
-                        child: Text("Kết nối"),
+                        child: Text("Connect"),
                         onPressed: () async {
                           showServices.value = false; // Ẩn danh sách service cũ nếu có
                           await controller.connectToDevice(device); // Gọi kết nối đến thiết bị được chọn
@@ -130,9 +242,9 @@ class BleView extends StatelessWidget {
                     ),
                   );
                 },
-              );
-            }),
-          ),
+              ),
+            );
+          }),
 
           // Hiển thị danh sách các dịch vụ BLE đã khám phá từ thiết bị
           Obx(() {
@@ -151,7 +263,7 @@ class BleView extends StatelessWidget {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("🧪 Service: ${service.uuid}"), // Hiển thị UUID của service
+                        Text("🧪 Service: ${service.uuid}"), //  Service: ${service.uuid}
                         ...service.characteristics.map(
                               (c) => Padding(
                             padding:
@@ -159,7 +271,7 @@ class BleView extends StatelessWidget {
                             child: Text(
                                 "🔹 Characteristic: ${c.uuid} | properties: ${c.properties}"),
                           ),
-                        ), // Lặp và hiển thị các đặc tính của service
+                        ), // Lặp và hiển thị các đặc tính của service    
                         SizedBox(height: 8),
                       ],
                     );

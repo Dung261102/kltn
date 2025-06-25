@@ -218,6 +218,13 @@ class RegisterPageState extends State<RegisterPage> {
       await _sharedPreferences.setDouble('weight', double.parse(weight.text));
       await _sharedPreferences.setInt('age', int.parse(age.text));
       
+      // Lưu thông tin đăng nhập nếu API trả về user data
+      if (res['user'] != null) {
+        await _sharedPreferences.setInt('userid', res['user']['id']);
+        await _sharedPreferences.setString('usermail', email);
+        await _sharedPreferences.setBool('isLoggedIn', true);
+      }
+      
       Fluttertoast.showToast(msg: 'Registration successful', textColor: Colors.green);
       Navigator.pushReplacement(
         context,

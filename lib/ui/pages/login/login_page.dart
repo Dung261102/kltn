@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'register_page.dart'; // Chuyển đến trang đăng ký
 import 'package:glucose_real_time/ui/theme/theme.dart';
 import 'package:glucose_real_time/rest/rest_api.dart';
+import 'package:glucose_real_time/services/glucose_service.dart';
 import '../../widgets/custom_bottom_navigation_bar.dart';
 import '../../widgets/form_fields_widgets.dart';
 
@@ -18,6 +19,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   late SharedPreferences _sharedPreferences;
+  final GlucoseService _glucoseService = GlucoseService();
 
   @override
   Widget build(BuildContext context) {
@@ -154,13 +156,20 @@ class _LoginPageState extends State<LoginPage> {
     if (res['success']) {
       String userEmail = res['user'][0]['email'];
       int userId = res['user'][0]['id'];
-      _sharedPreferences.setInt('userid', userId);
-      _sharedPreferences.setString('usermail', userEmail);
+      String username = res['user'][0]['name'] ?? 'User'; // Lấy username từ response
+      
+      // Lưu thông tin đăng nhập
+      await _sharedPreferences.setInt('userid', userId);
+      await _sharedPreferences.setString('usermail', userEmail);
+      await _sharedPreferences.setString('username', username);
+      
+      // Lưu trạng thái đã đăng nhập
+      await _sharedPreferences.setBool('isLoggedIn', true);
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => MainPage()),
-      );
+      // Load lại dữ liệu glucose và profile từ local storage
+      await _glucoseService.loadUserDataOnLogin();
+
+      Navigator.pushReplacementNamed(context, '/main');
     } else {
       Fluttertoast.showToast(
         msg: 'Email and password not valid!',

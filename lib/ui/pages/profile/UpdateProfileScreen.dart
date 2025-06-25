@@ -51,8 +51,10 @@ class UpdateProfileController extends GetxController {
     final weightText = weightController.text.trim();
     final ageText = ageController.text.trim();
     final Map<String, dynamic> result = {};
+    final prefs = await SharedPreferences.getInstance();
     if (updatedName.isNotEmpty) {
       result['name'] = updatedName;
+      await prefs.setString('username', updatedName);
     }
     if (heightText.isNotEmpty) {
       final height = double.tryParse(heightText);
@@ -61,6 +63,7 @@ class UpdateProfileController extends GetxController {
         return;
       }
       result['height'] = height;
+      await prefs.setDouble('height', height);
     }
     if (weightText.isNotEmpty) {
       final weight = double.tryParse(weightText);
@@ -69,6 +72,7 @@ class UpdateProfileController extends GetxController {
         return;
       }
       result['weight'] = weight;
+      await prefs.setDouble('weight', weight);
     }
     if (ageText.isNotEmpty) {
       final age = int.tryParse(ageText);
@@ -77,15 +81,14 @@ class UpdateProfileController extends GetxController {
         return;
       }
       result['age'] = age;
+      await prefs.setInt('age', age);
     }
     if (!kIsWeb && avatarPath.value.isNotEmpty) {
       result['avatar'] = avatarPath.value;
-      final prefs = await SharedPreferences.getInstance();
       await prefs.setString('avatar', avatarPath.value);
     }
     if (kIsWeb && avatarBytes.value != null) {
       result['avatar_base64'] = base64Encode(avatarBytes.value!);
-      final prefs = await SharedPreferences.getInstance();
       await prefs.setString('avatar_base64', result['avatar_base64']);
     }
     if (result.isEmpty) {

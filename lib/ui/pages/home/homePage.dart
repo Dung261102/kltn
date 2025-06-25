@@ -10,6 +10,9 @@ import 'dart:math'; // Hỗ trợ tạo dữ liệu ngẫu nhiên
 import 'dart:async'; // Cho các thao tác bất đồng bộ nếu cần
 import 'package:get/get.dart';
 import 'package:glucose_real_time/controllers/ble_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:glucose_real_time/controllers/user_controller.dart';
+import 'dart:convert';
 
 // Định nghĩa kiểu dữ liệu đơn giản để lưu lịch sử đo đường huyết
 typedef GlucoseRecord = ({DateTime time, int value});
@@ -22,32 +25,44 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // final glucoseCollection = FirebaseFirestore.instance.collection('Glucose');
   final BleController bleController = Get.put(BleController());
+  final UserController userController = Get.put(UserController());
   RxBool isMeasuring = false.obs;
 
   @override
   void initState() {
     super.initState();
     getGlucose();
+    _loadUserName();
+    _loadAvatar();
   }
 
-  Future<void> getGlucose() async {
-    final glucoseCollection = FirebaseFirestore.instance.collection('Glucose');
-    final glucoseSnapshot = await glucoseCollection.get();
+  Future<void> _loadUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('username') ?? "User";
+    userController.setUsername(name);
+  }
 
-    for (var doc in glucoseSnapshot.docs) {
-      final data = doc.data(); // data: Map<String, dynamic>
-
-      final Timestamp timestamp = data['Time']; // kiểu Timestamp
-      final DateTime time = timestamp.toDate(); // chuyển sang DateTime
-
-      final int glucose = data['GlucoseData']; // hoặc data['glucoseLevel'] tùy tên field
-
-      print('🩸 Glucose: $glucose mg/dL at $time');
+  Future<void> _loadAvatar() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedAvatar = prefs.getString('avatar');
+    final base64Str = prefs.getString('avatar_base64');
+    if (base64Str != null && base64Str.isNotEmpty) {
+      userController.setAvatarBytes(base64Decode(base64Str));
+    } else if (savedAvatar != null && savedAvatar.isNotEmpty) {
+      userController.setAvatarPath(savedAvatar);
+    } else {
+      userController.setAvatarPath("assets/images/profile/avatar.jpg");
     }
   }
 
+  Future<void> getGlucose() async {
+    // Lấy dữ liệu từ local (BLE Controller)
+    final history = await bleController.getGlucoseHistory();
+    for (var record in history) {
+      print('🩸 Glucose: ${record.value} mg/dL at ${record.time}');
+    }
+  }
 
   // Đánh giá trạng thái đường huyết theo ngưỡng thông thường
   String getGlucoseStatus(int value) {
@@ -66,6 +81,11 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: CommonAppBar(
         notifyHelper: notifyHelper,
+        title: 'Hi, WelcomeBack',
+        subtitle: Obx(() => Text(
+          userController.username.value,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+        )),
       ),
       body: Obx(() {
         final history = bleController.glucoseHistory;
@@ -94,7 +114,7 @@ class _HomePageState extends State<HomePage> {
                 icon: isMeasuring.value
                     ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                     : Icon(Icons.bloodtype),
-                label: Text(isMeasuring.value ? 'Đang đo...' : 'Đo Glucose'),
+                label: Text(isMeasuring.value ? 'Measuring...' : 'Measure Glucose'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
                   minimumSize: const Size(double.infinity, 50),
@@ -195,9 +215,36 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Measurement History',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Row(
+            children: [
+              const Icon(Icons.timeline, color: Colors.teal, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                'Measurement History',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.teal[700],
+                  letterSpacing: 1.1,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.teal.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text(
+                  "Recent",
+                  style: TextStyle(
+                    color: Colors.teal,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 10),
           Container(

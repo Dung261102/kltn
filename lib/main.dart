@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 
@@ -8,6 +7,7 @@ import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get_storage/get_storage.dart'; // thư viện lưu trữ biến cục bộ
 import 'package:glucose_real_time/db/db_helper.dart';
 import 'package:glucose_real_time/services/notification_services.dart';
+import 'package:glucose_real_time/services/glucose_service.dart';
 
 import 'package:glucose_real_time/services/theme_service.dart';
 import 'package:glucose_real_time/ui/pages/login/login_page.dart';
@@ -20,9 +20,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  await Utils.initBaseUrl(); // 👈 quan trọng!
-
 
   // await DBHelper.dropTable(); // Xoá bảng 'tasks'
   await DBHelper.initDb();
@@ -34,6 +31,9 @@ Future<void> main() async {
   notifyHelper.requestIOSPermissions();
   notifyHelper.requestAndroidNotificationPermission();
 
+  // Khởi tạo GlucoseService
+  await GlucoseService().initialize();
+
   runApp(MyApp());
 }
 
@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: "Flutter Demo",
+      title: "Glucose Real Time",
       debugShowCheckedModeBanner: false,
 
       theme: Themes.light,
@@ -53,16 +53,12 @@ class MyApp extends StatelessWidget {
 
       // Định nghĩa routes (đường dẫn), nơi mỗi route là một màn hình
       routes: {
-        // "/":
-        //     (context) =>
-        //         MainPage(), // Khi route là "/", nó sẽ điều hướng đến màn hình MainPage
-
         // "/": (context) => CheckLoginPage(), // Trang kiểm tra login đầu tiên
         // "/main": (context) => MainPage(), // Trang chính của app
         // "/login": (context) => LoginPage(),
-        // "/": (context) => LoginPage(),
-        // "/home": (context) => HomePage(),
-         "/": (context) => MainPage(),
+
+        //cập nhật báo cáo
+        "/": (context) =>  MainPage(),
       },
 
       // home: ReminderPage(), // màn hình đầu tiên
@@ -95,8 +91,8 @@ class _CheckLoginPageState extends State<CheckLoginPage> {
         // ❌ Nếu chưa đăng nhập → chuyển sang LoginPage
         Navigator.pushReplacementNamed(context, '/login');
       } else {
-        // ✅ Nếu đã đăng nhập → chuyển sang HomePage hoặc MainPage
-        Navigator.pushReplacementNamed(context, '/home'); // Hoặc '/main'
+        // ✅ Nếu đã đăng nhập → chuyển sang MainPage
+        Navigator.pushReplacementNamed(context, '/main');
       }
     });
   }
@@ -104,9 +100,34 @@ class _CheckLoginPageState extends State<CheckLoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.blueAccent,
       body: Center(
-        // Hiển thị vòng quay chờ trong khi kiểm tra login
-        child: CircularProgressIndicator(),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Logo hoặc icon app
+            Icon(
+              Icons.favorite,
+              size: 100,
+              color: Colors.white,
+            ),
+            SizedBox(height: 20),
+            // Tên app
+            Text(
+              "Glucose Real Time",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(height: 40),
+            // Hiển thị vòng quay chờ trong khi kiểm tra login
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ],
+        ),
       ),
     );
   }
