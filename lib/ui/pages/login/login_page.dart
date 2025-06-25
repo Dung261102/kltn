@@ -35,6 +35,15 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
+  // Thêm hàm xoá email khỏi lịch sử
+  Future<void> _removeEmailFromHistory(String email) async {
+    _sharedPreferences = await SharedPreferences.getInstance();
+    setState(() {
+      emailHistory.remove(email);
+    });
+    await _sharedPreferences.setStringList('email_history', emailHistory);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -92,9 +101,69 @@ class _LoginPageState extends State<LoginPage> {
                     fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
                       return FormFields(
                         controller: controller,
+                        focusNode: focusNode,
                         data: Icons.email,
                         txtHint: 'Email',
                         obsecure: false,
+                      );
+                    },
+                    optionsViewBuilder: (context, onSelected, options) {
+                      return Align(
+                        alignment: Alignment.topLeft,
+                        child: Material(
+                          elevation: 8,
+                          borderRadius: BorderRadius.circular(16),
+                          child: Container(
+                            width: 320,
+                            constraints: BoxConstraints(maxHeight: 220),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 12,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: ListView.separated(
+                              padding: EdgeInsets.zero,
+                              shrinkWrap: true,
+                              itemCount: options.length,
+                              separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey[200]),
+                              itemBuilder: (context, index) {
+                                final option = options.elementAt(index);
+                                return Row(
+                                  children: [
+                                    Expanded(
+                                      child: InkWell(
+                                        onTap: () => onSelected(option),
+                                        borderRadius: BorderRadius.circular(16),
+                                        child: Container(
+                                          padding: EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                                          child: Text(
+                                            option,
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.black87,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+                                      tooltip: 'Xoá email này',
+                                      onPressed: () => _removeEmailFromHistory(option),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                        ),
                       );
                     },
                   ),

@@ -15,10 +15,12 @@ class FormFields extends StatelessWidget {
   final IconData? data;                     // Cho phép null
   final String? txtHint;                    // Cho phép null
   final bool obsecure;                      // Mặc định là true
+  final FocusNode? focusNode; // Thêm dòng này
 
   FormFields({
     Key? key,
     this.controller,
+    this.focusNode, // Thêm dòng này
     this.data,
     this.txtHint,
     this.obsecure = true,
@@ -43,6 +45,7 @@ class FormFields extends StatelessWidget {
       margin: EdgeInsets.symmetric(vertical: 8, horizontal: 5),
       child: TextFormField(
         controller: controller,
+        focusNode: focusNode, // Thêm dòng này
         obscureText: obsecure,
         style: titleStyle,
         decoration: InputDecoration(

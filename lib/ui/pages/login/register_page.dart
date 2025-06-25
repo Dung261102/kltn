@@ -18,8 +18,8 @@ class RegisterPageState extends State<RegisterPage> {
   final TextEditingController email = TextEditingController();
   final TextEditingController username = TextEditingController();
   final TextEditingController dob = TextEditingController();
-  // final TextEditingController phone = TextEditingController();
-  // final TextEditingController address = TextEditingController();
+  final TextEditingController phone = TextEditingController();
+  final TextEditingController address = TextEditingController();
   final TextEditingController password = TextEditingController();
   final TextEditingController confirmPassword = TextEditingController();
   final TextEditingController height = TextEditingController();
@@ -87,18 +87,18 @@ class RegisterPageState extends State<RegisterPage> {
                     txtHint: 'Date of Birth',
                     obsecure: false,
                   ),
-                  // FormFields(
-                  //   controller: phone,
-                  //   data: Icons.phone,
-                  //   txtHint: 'Phone',
-                  //   obsecure: false,
-                  // ),
-                  // FormFields(
-                  //   controller: address,
-                  //   data: Icons.home,
-                  //   txtHint: 'Address',
-                  //   obsecure: false,
-                  // ),
+                  FormFields(
+                    controller: phone,
+                    data: Icons.phone,
+                    txtHint: 'Phone',
+                    obsecure: false,
+                  ),
+                  FormFields(
+                    controller: address,
+                    data: Icons.home,
+                    txtHint: 'Address',
+                    obsecure: false,
+                  ),
                   FormFields(
                     controller: height,
                     data: Icons.height,
@@ -144,9 +144,9 @@ class RegisterPageState extends State<RegisterPage> {
                           username.text,
                           email.text,
                           password.text,
-                          // phone.text,
+                          phone.text,
                           dob.text,
-                          // address.text,
+                          address.text,
                         );
                       }
                     },
@@ -222,12 +222,11 @@ class RegisterPageState extends State<RegisterPage> {
       String username,
       String email,
       String password,
-      // String phone,
+      String phone,
       String dob,
-      // String address,
+      String address,
   ) async {
-    // var res = await userRegister(username, email, password, phone, dob, address);
-    var res = await userRegister(username, email, password, dob);
+    var res = await userRegister(username, email, password, phone, dob, address);
 
     if (res['success']) { // nếu đăng ký thành công
       // Save username and body information to SharedPreferences
