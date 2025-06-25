@@ -20,127 +20,176 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   late SharedPreferences _sharedPreferences;
   final GlucoseService _glucoseService = GlucoseService();
+  List<String> emailHistory = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEmailHistory();
+  }
+
+  Future<void> _loadEmailHistory() async {
+    _sharedPreferences = await SharedPreferences.getInstance();
+    setState(() {
+      emailHistory = _sharedPreferences.getStringList('email_history') ?? [];
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(25),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(height: 20),
-                Text(
-                  "Login here",
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blueAccent,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-
-                SizedBox(height: 10),
-
-                Text(
-                  "Welcome back you've been missed!",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                    letterSpacing: 0.5,
-                  ),
-                ),
-
-                SizedBox(height: 35),
-
-                // Trường email
-                FormFields(
-                  controller: _emailController,
-                  data: Icons.email,
-                  txtHint: 'Email',
-                  obsecure: false,
-                ),
-
-                // Trường password
-                FormFields(
-                  controller: _passwordController,
-                  data: Icons.lock,
-                  txtHint: 'Password',
-                  obsecure: true,
-                ),
-
-                SizedBox(height: 10),
-
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: Text(
-                    'Forgot Password?',
+      //backgroundColor: Colors.white,
+      body: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blueAccent, Colors.white],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(25),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(height: 20),
+                  Text(
+                    "Login here",
                     style: TextStyle(
-                      color: Colors.blueGrey,
-                      fontSize: 13,
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 1.2,
                     ),
                   ),
-                ),
-
-                SizedBox(height: 20),
-
-                // Nút đăng nhập
-                ElevatedButton(
-                  onPressed: () {
-                    if (_emailController.text.isNotEmpty &&
-                        _passwordController.text.isNotEmpty) {
-                      doLogin(_emailController.text, _passwordController.text);
-                    } else {
-                      Fluttertoast.showToast(
-                        msg: 'All fields are required',
-                        textColor: Colors.red,
+                  SizedBox(height: 10),
+                  Text(
+                    "Welcome back you've been missed!",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white70,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  SizedBox(height: 35),
+                  // Trường email
+                  Autocomplete<String>(
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      if (textEditingValue.text == '') {
+                        return emailHistory;
+                      }
+                      return emailHistory.where((String option) {
+                        return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                      });
+                    },
+                    onSelected: (String selection) {
+                      _emailController.text = selection;
+                    },
+                    fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
+                      return FormFields(
+                        controller: controller,
+                        data: Icons.email,
+                        txtHint: 'Email',
+                        obsecure: false,
                       );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    },
+                  ),
+                  // Trường password
+                  FormFields(
+                    controller: _passwordController,
+                    data: Icons.lock,
+                    txtHint: 'Password',
+                    obsecure: true,
+                  ),
+                  SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      'Forgot Password?',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
-                  child: Text(
-                    "Login",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                ),
-
-                SizedBox(height: 20),
-
-                // Chuyển sang đăng ký
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => RegisterPage()),
-                    );
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("Don't have an account? ",
-                          style: TextStyle(fontSize: 14)),
-                      Text(
-                        'Register',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.blueAccent,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  SizedBox(height: 20),
+                  // Nút đăng nhập
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_emailController.text.isNotEmpty &&
+                          _passwordController.text.isNotEmpty) {
+                        doLogin(_emailController.text, _passwordController.text);
+                      } else {
+                        Fluttertoast.showToast(
+                          msg: 'All fields are required',
+                          textColor: Colors.red,
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    ],
+                      elevation: 3,
+                    ),
+                    child: Text(
+                      "Login",
+                      style: TextStyle(fontSize: 16, color: Colors.blueAccent, fontWeight: FontWeight.bold),
+                    ),
                   ),
-                ),
-              ],
+                  SizedBox(height: 20),
+                  // Chuyển sang đăng ký
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => RegisterPage()),
+                      );
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Don't have an account? ",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.blueAccent,
+                            fontWeight: FontWeight.w500,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 2,
+                                color: Colors.black26,
+                                offset: Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          'Register',
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.yellowAccent,
+                            fontWeight: FontWeight.bold,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 2,
+                                color: Colors.black26,
+                                offset: Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -165,6 +214,13 @@ class _LoginPageState extends State<LoginPage> {
       
       // Lưu trạng thái đã đăng nhập
       await _sharedPreferences.setBool('isLoggedIn', true);
+
+      // Lưu email vào history
+      List<String> emailHistory = _sharedPreferences.getStringList('email_history') ?? [];
+      if (!emailHistory.contains(userEmail)) {
+        emailHistory.add(userEmail);
+        await _sharedPreferences.setStringList('email_history', emailHistory);
+      }
 
       // Load lại dữ liệu glucose và profile từ local storage
       await _glucoseService.loadUserDataOnLogin();

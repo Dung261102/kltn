@@ -53,12 +53,12 @@ class MyApp extends StatelessWidget {
 
       // Định nghĩa routes (đường dẫn), nơi mỗi route là một màn hình
       routes: {
-        // "/": (context) => CheckLoginPage(), // Trang kiểm tra login đầu tiên
-        // "/main": (context) => MainPage(), // Trang chính của app
-        // "/login": (context) => LoginPage(),
+        "/": (context) => CheckLoginPage(), // Trang kiểm tra login đầu tiên
+        "/main": (context) => MainPage(), // Trang chính của app
+        "/login": (context) => LoginPage(),
 
-        //cập nhật báo cáo
-        "/": (context) =>  MainPage(),
+        //cập nhật UI
+        // "/": (context) =>  MainPage(),
       },
 
       // home: ReminderPage(), // màn hình đầu tiên

@@ -34,9 +34,10 @@ Future<Map<String, dynamic>> userRegister(
     String username,
     String email,
     String password,
-    String phone,
+    // String phone,
     String dob,
-    String address) async {
+    // String address
+    ) async {
   final response = await http.post(
     Uri.parse('${Utils.baseUrl}/user/register'),
     headers: {
@@ -47,9 +48,9 @@ Future<Map<String, dynamic>> userRegister(
       'name': username,
       'email': email,
       'password': password,
-      'phone': phone,
+      // 'phone': phone,
       'dob': dob,
-      'address': address
+      // 'address': address
     }),
   );
 
