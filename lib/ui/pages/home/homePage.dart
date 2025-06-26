@@ -166,7 +166,7 @@ class _HomePageState extends State<HomePage> {
                   title: null,
                   showMetrics: false,
                 ),
-                _buildGlucoseDisplay(glucoseHistory.last.value, isConnected, device?.name ?? ''),
+                _buildGlucoseDisplay(glucoseHistory.last.value, isConnected, device?.name ?? '', glucoseHistory.last.time),
                 _buildHistoryList(glucoseHistory),
               ],
             );
@@ -193,7 +193,7 @@ class _HomePageState extends State<HomePage> {
                 title: null,
                 showMetrics: false,
               ),
-              _buildGlucoseDisplay(bleHistory.isNotEmpty ? bleHistory.last.value : 0, isConnected, device?.name ?? ''),
+              _buildGlucoseDisplay(bleHistory.isNotEmpty ? bleHistory.last.value : 0, isConnected, device?.name ?? '', bleHistory.isNotEmpty ? bleHistory.last.time : DateTime.now()),
               // Chỉ Obx cho nút đo glucose
               Obx(() => ElevatedButton.icon(
                     onPressed: isMeasuring.value ? null : () async {
@@ -218,69 +218,125 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildGlucoseDisplay(int displayValue, bool isConnected, String deviceName) {
+  Widget _buildGlucoseDisplay(int displayValue, bool isConnected, String deviceName, DateTime measuredTime) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.teal.withOpacity(0.2),
-              blurRadius: 10,
+              color: Colors.redAccent.withOpacity(0.10),
+              blurRadius: 16,
               offset: const Offset(0, 6),
             )
           ],
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.water_drop,
-                  color: isConnected ? Colors.blue : Colors.grey,
-                  size: 28,
+            // Header
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.greenAccent.withOpacity(0.02),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  'Glucose',
-                  style: headingStyle,
-                ),
-                const SizedBox(width: 8),
-                if (isConnected)
-                  const Icon(
-                    Icons.bluetooth_connected,
-                    color: Colors.blue,
-                    size: 20,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.water_drop, color: Colors.redAccent, size: 28),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Glucose',
+                    style: headingStyle.copyWith(
+                      fontFamily: 'Montserrat',
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.greenAccent,
+                      letterSpacing: 1.2,
+                    ),
                   ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              '$displayValue mg/dL',
-              style: TextStyle(
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
-                color: isConnected ? Colors.teal : Colors.grey,
+                  const SizedBox(width: 10),
+                  if (isConnected)
+                    const Icon(Icons.bluetooth_connected, color: Colors.blue, size: 22),
+                ],
               ),
             ),
-            const SizedBox(height: 10),
-            Text(
-              getGlucoseStatus(displayValue),
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              isConnected
-                  ? 'Connected: $deviceName'
-                  : 'Not connected to device',
-              style: TextStyle(
-                fontSize: 12,
-                color: isConnected ? Colors.grey[600] : Colors.red[300],
+            
+            // Body
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Cột trái: Giá trị glucose
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          //giá trị glucose
+                          Text(
+                            '$displayValue',
+                            style: const TextStyle(
+                              fontSize: 38,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: 4),
+                            //đơn vị đo
+                            child: Text('mg/dL', style: TextStyle(fontSize: 16, color: Colors.redAccent)),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          const Icon(Icons.access_time, size: 16, color: Colors.orange),
+                          const SizedBox(width: 4),
+                          //thời gian đo
+                          Text('Measured at \\${_formatTime(measuredTime)}', style: const TextStyle(fontSize: 13, color: Colors.black54, fontStyle: FontStyle.italic)),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                  ),
+                  const SizedBox(width: 32),
+                  // Cột phải: Thông tin phụ
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        //trạng thái đường huyết
+                        Text(
+                          getGlucoseStatus(displayValue),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 25),
+                        //thông báo kết nối
+                        Text(
+                          isConnected ? 'Connected: $deviceName' : 'Not connected to device',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isConnected ? Colors.grey[600] : Colors.red[300],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -471,5 +527,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 // Widget chuyển đổi dữ liệu glucoseHistory sang FlSpot và hiển thị bằng GlucoseLineChart
+
+
 
 
