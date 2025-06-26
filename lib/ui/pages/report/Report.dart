@@ -7,7 +7,6 @@ import 'package:get/get.dart';
 import 'package:glucose_real_time/controllers/ble_controller.dart';
 import 'package:glucose_real_time/controllers/glucose_controller.dart';
 
-
 class ReportPage extends StatefulWidget {
   const ReportPage({super.key});
 
@@ -23,13 +22,16 @@ class MonthYear {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MonthYear && runtimeType == other.runtimeType && month == other.month && year == other.year;
+      other is MonthYear &&
+          runtimeType == other.runtimeType &&
+          month == other.month &&
+          year == other.year;
 
   @override
   int get hashCode => month.hashCode ^ year.hashCode;
 
   @override
-  String toString() => 'Tháng $month/$year';
+  String toString() => 'Month $month/$year';
 }
 
 class _ReportPageState extends State<ReportPage> {
@@ -59,7 +61,9 @@ class _ReportPageState extends State<ReportPage> {
   // Thêm dữ liệu mẫu chỉ trong tháng 6 và năm 2025
   void _addSampleDataForReport() {
     final List<({DateTime time, int value})> samples = [];
-    final random = DateTime.now().millisecondsSinceEpoch;
+    final random = DateTime
+        .now()
+        .millisecondsSinceEpoch;
     final usedDays = <int>{};
     for (int i = 0; i < 10; i++) {
       int day;
@@ -83,20 +87,27 @@ class _ReportPageState extends State<ReportPage> {
     if (idx == 0) {
       // Day: lọc theo ngày mới nhất trong dữ liệu
       return history
-          .where((e) => e.time.year == latest.year && e.time.month == latest.month && e.time.day == latest.day)
+          .where(
+            (e) =>
+        e.time.year == latest.year &&
+            e.time.month == latest.month &&
+            e.time.day == latest.day,
+      )
           .toList();
     } else if (idx == 1) {
       // Month: lọc theo selectedMonthYear
       if (selectedMonthYear == null) return [];
       return history
-          .where((e) => e.time.year == selectedMonthYear!.year && e.time.month == selectedMonthYear!.month)
+          .where(
+            (e) =>
+        e.time.year == selectedMonthYear!.year &&
+            e.time.month == selectedMonthYear!.month,
+      )
           .toList();
     } else {
       // Year: lọc theo selectedYear
       if (selectedYear == null) return [];
-      return history
-          .where((e) => e.time.year == selectedYear)
-          .toList();
+      return history.where((e) => e.time.year == selectedYear).toList();
     }
   }
 
@@ -156,7 +167,12 @@ class _ReportPageState extends State<ReportPage> {
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           decoration: BoxDecoration(
-            color: Colors.grey[200],
+            // color: Colors.blueAccent,
+            gradient: LinearGradient(
+              colors: [Colors.blueAccent, Colors.white],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
             borderRadius: BorderRadius.circular(25),
           ),
           child: Row(
@@ -173,20 +189,35 @@ class _ReportPageState extends State<ReportPage> {
           builder: (context, value, _) {
             if (value == 1) {
               // Tab Month: chọn tháng/năm
-              final monthYears = glucoseController.glucoseHistory
+              final monthYears =
+              glucoseController.glucoseHistory
                   .map((e) => MonthYear(e.time.month, e.time.year))
                   .toSet()
                   .toList();
-              monthYears.sort((a, b) => b.year != a.year ? b.year.compareTo(a.year) : b.month.compareTo(a.month));
+              monthYears.sort(
+                    (a, b) =>
+                b.year != a.year
+                    ? b.year.compareTo(a.year)
+                    : b.month.compareTo(a.month),
+              );
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 4,
+                ),
                 child: DropdownButton<MonthYear>(
                   value: selectedMonthYear,
                   isExpanded: true,
-                  items: monthYears.map((m) => DropdownMenuItem<MonthYear>(
-                    value: m,
-                    child: Text(m.toString()),
-                  )).toList(),
+                  items:
+                  monthYears
+                      .map(
+                        (m) =>
+                        DropdownMenuItem<MonthYear>(
+                          value: m,
+                          child: Text(m.toString()),
+                        ),
+                  )
+                      .toList(),
                   onChanged: (val) {
                     setState(() {
                       selectedMonthYear = val;
@@ -196,13 +227,30 @@ class _ReportPageState extends State<ReportPage> {
               );
             } else if (value == 2) {
               // Tab Year: chọn năm
-              final years = glucoseController.glucoseHistory.map((e) => e.time.year).toSet().toList()..sort((a, b) => b.compareTo(a));
+              final years =
+              glucoseController.glucoseHistory
+                  .map((e) => e.time.year)
+                  .toSet()
+                  .toList()
+                ..sort((a, b) => b.compareTo(a));
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 4,
+                ),
                 child: DropdownButton<int>(
                   value: selectedYear,
                   isExpanded: true,
-                  items: years.map((y) => DropdownMenuItem<int>(value: y, child: Text("Năm $y"))).toList(),
+                  items:
+                  years
+                      .map(
+                        (y) =>
+                        DropdownMenuItem<int>(
+                          value: y,
+                          child: Text("Year $y"),
+                        ),
+                  )
+                      .toList(),
                   onChanged: (val) {
                     setState(() {
                       selectedYear = val;
@@ -229,18 +277,29 @@ class _ReportPageState extends State<ReportPage> {
             // Khi chuyển tab, cập nhật selectedMonthYear/selectedYear phù hợp
             if (index == 1) {
               // Tab Month
-              final monthYears = glucoseController.glucoseHistory
+              final monthYears =
+              glucoseController.glucoseHistory
                   .map((e) => MonthYear(e.time.month, e.time.year))
                   .toSet()
                   .toList();
               if (monthYears.isNotEmpty) {
-                monthYears.sort((a, b) => b.year != a.year ? b.year.compareTo(a.year) : b.month.compareTo(a.month));
+                monthYears.sort(
+                      (a, b) =>
+                  b.year != a.year
+                      ? b.year.compareTo(a.year)
+                      : b.month.compareTo(a.month),
+                );
                 selectedMonthYear = monthYears.first;
                 setState(() {});
               }
             } else if (index == 2) {
               // Tab Year
-              final years = glucoseController.glucoseHistory.map((e) => e.time.year).toSet().toList()..sort((a, b) => b.compareTo(a));
+              final years =
+              glucoseController.glucoseHistory
+                  .map((e) => e.time.year)
+                  .toSet()
+                  .toList()
+                ..sort((a, b) => b.compareTo(a));
               if (years.isNotEmpty) {
                 selectedYear = years.first;
                 setState(() {});
@@ -251,13 +310,13 @@ class _ReportPageState extends State<ReportPage> {
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 25),
             decoration: BoxDecoration(
-              color: isSelected ? Colors.black : Colors.transparent,
+              color: isSelected ? Colors.white : Colors.transparent,
               borderRadius: BorderRadius.circular(30),
             ),
             child: Text(
               label,
               style: titleStyle.copyWith(
-                color: isSelected ? Colors.white : Colors.grey,
+                color: isSelected ? Colors.black : Colors.grey,
               ),
             ),
           ),
@@ -350,17 +409,38 @@ class _ReportPageState extends State<ReportPage> {
         children: [
           Icon(icon, color: color, size: 28),
           const SizedBox(height: 8),
-          Text(label, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: color)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
           const SizedBox(height: 6),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(number, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color)),
+              Text(
+                number,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
               if (unit.isNotEmpty) ...[
                 const SizedBox(width: 4),
-                Text(unit, style: TextStyle(fontSize: 13, color: color, fontWeight: FontWeight.w500)),
-              ]
+                Text(
+                  unit,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: color,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ],
           ),
         ],
@@ -368,7 +448,50 @@ class _ReportPageState extends State<ReportPage> {
     );
   }
 
+
   Widget _buildTodaySection() {
+    // Lấy dữ liệu glucose theo tab đang được chọn (Day/Month/Year)
+    final filteredData = _filteredGlucoseRecords();
+
+    String lastValue = "-";
+    String lastTime = "--:--";
+    String maxValue = "-";
+    String maxTime = "--:--";
+    String minValue = "-";
+    String minTime = "--:--";
+
+    if (filteredData.isNotEmpty) {
+      // Sắp xếp theo thời gian tăng dần
+      filteredData.sort((a, b) => a.time.compareTo(b.time));
+      final last = filteredData.last;
+      lastValue = last.value.toString();
+      lastTime =
+      "${last.time.hour.toString().padLeft(2, '0')}:${last.time.minute
+          .toString().padLeft(2, '0')}";
+
+      // Tìm max
+      final maxEntry = filteredData.reduce((a, b) => a.value > b.value ? a : b);
+      maxValue = maxEntry.value.toString();
+      maxTime =
+      "${maxEntry.time.hour.toString().padLeft(2, '0')}:${maxEntry.time.minute
+          .toString().padLeft(2, '0')}";
+
+      // Tìm min
+      final minEntry = filteredData.reduce((a, b) => a.value < b.value ? a : b);
+      minValue = minEntry.value.toString();
+      minTime =
+      "${minEntry.time.hour.toString().padLeft(2, '0')}:${minEntry.time.minute
+          .toString().padLeft(2, '0')}";
+    }
+
+    // // Xác định tiêu đề dựa trên tab đang được chọn
+    // String sectionTitle = "Today";
+    // if (selectedIndex.value == 1) {
+    //   sectionTitle = "Month Summary";
+    // } else if (selectedIndex.value == 2) {
+    //   sectionTitle = "Year Summary";
+    // }
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
       padding: const EdgeInsets.all(20),
@@ -385,45 +508,236 @@ class _ReportPageState extends State<ReportPage> {
       ),
       child: Column(
         children: [
-          Text("Today", style: headingStyle.copyWith(color: Colors.black)),
-          const SizedBox(height: 10),
-          _buildTodayMetricRow(Icons.bloodtype, "108", "mg/dL", "14:06"),
-          _buildTodayMetricRow(Icons.favorite, "72", "bpm", "14:06"),
-          _buildTodayMetricRow(Icons.directions_car, "85", "score", "14:06"),
+          Row(
+            children: [
+              Icon(Icons.analytics, color: Colors.blue.shade600, size: 24),
+              const SizedBox(width: 10),
+
+              Text("Today", style: headingStyle.copyWith(color: Colors.black)),
+
+            ],
+          ),
+          const SizedBox(height: 15),
+          _buildMetricCardWithBadge(
+            icon: Icons.access_time,
+            value: lastValue,
+            unit: "mg/dL",
+            time: lastTime,
+            label: "Latest Reading",
+            description: "Most recent glucose measurement",
+            color: Colors.blue,
+            badgeText: "LATEST",
+          ),
+          const SizedBox(height: 12),
+          _buildMetricCardWithBadge(
+            icon: Icons.trending_up,
+            value: maxValue,
+            unit: "mg/dL",
+            time: maxTime,
+            label: "Highest Level",
+            description: "Peak glucose value recorded",
+            color: Colors.red,
+            badgeText: "MAX",
+          ),
+          const SizedBox(height: 12),
+          _buildMetricCardWithBadge(
+            icon: Icons.trending_down,
+            value: minValue,
+            unit: "mg/dL",
+            time: minTime,
+            label: "Lowest Level",
+            description: "Lowest glucose value recorded",
+            color: Colors.green,
+            badgeText: "MIN",
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildTodayMetricRow(
-      IconData icon, String value, String unit, String time) {
+  Widget _buildMetricCardWithBadge({
+    required IconData icon,
+    required String value,
+    required String unit,
+    required String time,
+    required String label,
+    required String description,
+    required Color color,
+    required String badgeText,
+  }) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(20),
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.2)),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
+          // Icon với background
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(width: 16),
+
+          // Thông tin chính
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        badgeText,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      unit,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: color,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Thời gian
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Icon(icon, color: Colors.red, size: 30),
-              const SizedBox(width: 10),
-              Text(value, style: headingStyle.copyWith(color: Colors.black)),
+              Icon(Icons.schedule, color: Colors.grey.shade400, size: 16),
+              const SizedBox(height: 4),
+              Text(
+                time,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade700,
+                ),
+              ),
             ],
           ),
-          Text(unit, style: titleStyle.copyWith(color: Colors.black)),
-          Text(time, style: subTitleStyle.copyWith(color: Colors.grey)),
         ],
       ),
     );
   }
+
+
+//   Widget _buildDoctorReports() {
+//     return Container(
+//       margin: const EdgeInsets.fromLTRB(20, 10, 20, 30),
+//       padding: const EdgeInsets.all(20),
+//       decoration: BoxDecoration(
+//         color: Colors.white,
+//         borderRadius: BorderRadius.circular(30),
+//         boxShadow: [
+//           BoxShadow(
+//             color: Colors.grey.withOpacity(0.3),
+//             blurRadius: 10,
+//             offset: const Offset(0, 4),
+//           ),
+//         ],
+//       ),
+//       child: Column(
+//         children: [
+//           Text(
+//             "Doctor Reports",
+//             style: headingStyle.copyWith(color: Colors.black),
+//           ),
+//           const SizedBox(height: 10),
+//           _buildReportList(),
+//         ],
+//       ),
+//     );
+//   }
+//
+//   Widget _buildReportList() {
+//     final List<String> reports = [
+//       "Doctor report on 03/05",
+//       "Doctor report on 02/05",
+//       "Doctor report on 01/05",
+//     ];
+//
+//     return Column(
+//       children: reports.map((report) => _buildReportItem(report)).toList(),
+//     );
+//   }
+//
+//   Widget _buildReportItem(String title) {
+//     return Container(
+//       margin: const EdgeInsets.symmetric(vertical: 6),
+//       padding: const EdgeInsets.all(15),
+//       decoration: BoxDecoration(
+//         color: Colors.grey[100],
+//         borderRadius: BorderRadius.circular(20),
+//       ),
+//       child: Row(
+//         children: [
+//           const Icon(Icons.insert_drive_file, color: Colors.teal, size: 28),
+//           const SizedBox(width: 10),
+//           Expanded(
+//             child: Text(title, style: titleStyle.copyWith(color: Colors.black)),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
 
   Widget _buildDoctorReports() {
     return Container(
-      margin: const EdgeInsets.fromLTRB(20, 10, 20, 30),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -438,11 +752,16 @@ class _ReportPageState extends State<ReportPage> {
       ),
       child: Column(
         children: [
-          Text(
-            "Doctor Reports",
-            style: headingStyle.copyWith(color: Colors.black),
+          Row(
+            children: [
+              Icon(Icons.medical_services, color: Colors.blue.shade600,
+                  size: 24),
+              const SizedBox(width: 10),
+              Text("Doctor Reports",
+                  style: headingStyle.copyWith(color: Colors.black)),
+            ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 15),
           _buildReportList(),
         ],
       ),
@@ -450,10 +769,25 @@ class _ReportPageState extends State<ReportPage> {
   }
 
   Widget _buildReportList() {
-    final List<String> reports = [
-      "Doctor report on 03/05",
-      "Doctor report on 02/05",
-      "Doctor report on 01/05",
+    final List<Map<String, dynamic>> reports = [
+      {
+        "title": "Doctor report on 03/05",
+        "description": "Latest medical consultation summary",
+        "date": "May 3, 2025",
+        "status": "Completed"
+      },
+      {
+        "title": "Doctor report on 02/05",
+        "description": "Follow-up appointment notes",
+        "date": "May 2, 2025",
+        "status": "Completed"
+      },
+      {
+        "title": "Doctor report on 01/05",
+        "description": "Initial consultation report",
+        "date": "May 1, 2025",
+        "status": "Completed"
+      },
     ];
 
     return Column(
@@ -461,22 +795,85 @@ class _ReportPageState extends State<ReportPage> {
     );
   }
 
-  Widget _buildReportItem(String title) {
+  Widget _buildReportItem(Map<String, dynamic> report) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      padding: const EdgeInsets.all(15),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: Colors.blue.withOpacity(0.08),
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.blue.withOpacity(0.2), width: 1),
       ),
       child: Row(
         children: [
-          const Icon(Icons.insert_drive_file, color: Colors.teal, size: 28),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(title,
-                style: titleStyle.copyWith(color: Colors.black)),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+                Icons.medical_services, color: Colors.blue.shade600, size: 24),
           ),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  report["title"],
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  report["description"],
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Icon(Icons.calendar_today, color: Colors.grey.shade500,
+                        size: 14),
+                    const SizedBox(width: 4),
+                    Text(
+                      report["date"],
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 15),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        report["status"],
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.green.shade700,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Icon(Icons.arrow_forward_ios, color: Colors.grey.shade400, size: 16),
         ],
       ),
     );

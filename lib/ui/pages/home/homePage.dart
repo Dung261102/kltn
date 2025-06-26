@@ -82,8 +82,8 @@ class _HomePageState extends State<HomePage> {
           for (var item in data) {
             if (item is Map && item['value'] is int && item['created'] != null) {
               list.add((
-                time: DateTime.parse(item['created'].toString()),
-                value: item['value']
+              time: DateTime.parse(item['created'].toString()),
+              value: item['value']
               ));
             }
           }
@@ -196,20 +196,20 @@ class _HomePageState extends State<HomePage> {
               _buildGlucoseDisplay(bleHistory.isNotEmpty ? bleHistory.last.value : 0, isConnected, device?.name ?? '', bleHistory.isNotEmpty ? bleHistory.last.time : DateTime.now()),
               // Chỉ Obx cho nút đo glucose
               Obx(() => ElevatedButton.icon(
-                    onPressed: isMeasuring.value ? null : () async {
-                      isMeasuring.value = true;
-                      await bleController.doMeasureGlucose();
-                      isMeasuring.value = false;
-                    },
-                    icon: isMeasuring.value
-                        ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : Icon(Icons.bloodtype),
-                    label: Text(isMeasuring.value ? 'Measuring...' : 'Measure Glucose'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                      minimumSize: const Size(double.infinity, 50),
-                    ),
-                  )),
+                onPressed: isMeasuring.value ? null : () async {
+                  isMeasuring.value = true;
+                  await bleController.doMeasureGlucose();
+                  isMeasuring.value = false;
+                },
+                icon: isMeasuring.value
+                    ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : Icon(Icons.bloodtype),
+                label: Text(isMeasuring.value ? 'Measuring...' : 'Measure Glucose'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  minimumSize: const Size(double.infinity, 50),
+                ),
+              )),
               _buildHistoryList(bleHistory),
             ],
           );
@@ -274,7 +274,7 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-            
+
             // Body
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
@@ -424,7 +424,7 @@ class _HomePageState extends State<HomePage> {
             child: Row(
               children: [
                 const Icon(Icons.history, color: Colors.orange),
-                
+
                 const SizedBox(width: 10),
                 Text(
                   '${record.value} mg/dL',
@@ -493,8 +493,8 @@ class _HomePageState extends State<HomePage> {
     final Random random = Random();
     return List.generate(20, (index) {
       return (
-        time: DateTime.now().subtract(Duration(minutes: (20 - index) * 5)),
-        value: 80 + random.nextInt(60),
+      time: DateTime.now().subtract(Duration(minutes: (20 - index) * 5)),
+      value: 80 + random.nextInt(60),
       );
     });
   }
@@ -546,7 +546,6 @@ class _HomePageState extends State<HomePage> {
 }
 
 // Widget chuyển đổi dữ liệu glucoseHistory sang FlSpot và hiển thị bằng GlucoseLineChart
-
 
 
 
