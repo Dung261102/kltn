@@ -105,20 +105,55 @@ class _CheckLoginPageState extends State<CheckLoginPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Logo hoặc icon app
-            Icon(
-              Icons.favorite,
-              size: 100,
-              color: Colors.white,
+            // Logo app_icon thay cho hình trái tim
+            Container(
+              width: 110,
+              height: 110,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(32),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 16,
+                    offset: Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Image.asset(
+                  'assets/icon/app_icon.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 28),
             // Tên app
             Text(
               "Glucose Real Time",
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 28,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
+                letterSpacing: 1.2,
+                shadows: [
+                  Shadow(
+                    blurRadius: 8,
+                    color: Colors.black26,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 16),
+            Text(
+              "Your health, your data, real time!",
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white70,
+                fontStyle: FontStyle.italic,
+                letterSpacing: 0.5,
               ),
             ),
             SizedBox(height: 40),

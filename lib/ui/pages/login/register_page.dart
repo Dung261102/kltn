@@ -84,37 +84,37 @@ class RegisterPageState extends State<RegisterPage> {
                   FormFields(
                     controller: dob,
                     data: Icons.calendar_today,
-                    txtHint: 'Date of Birth',
+                    txtHint: 'Date of Birth (optional)',
                     obsecure: false,
                   ),
                   FormFields(
                     controller: phone,
                     data: Icons.phone,
-                    txtHint: 'Phone',
+                    txtHint: 'Phone (optional)',
                     obsecure: false,
                   ),
                   FormFields(
                     controller: address,
                     data: Icons.home,
-                    txtHint: 'Address',
+                    txtHint: 'Address (optional)',
                     obsecure: false,
                   ),
                   FormFields(
                     controller: height,
                     data: Icons.height,
-                    txtHint: 'Height (cm)',
+                    txtHint: 'Height (cm, optional)',
                     obsecure: false,
                   ),
                   FormFields(
                     controller: weight,
                     data: Icons.monitor_weight,
-                    txtHint: 'Weight (kg)',
+                    txtHint: 'Weight (kg, optional)',
                     obsecure: false,
                   ),
                   FormFields(
                     controller: age,
                     data: Icons.person_outline,
-                    txtHint: 'Age',
+                    txtHint: 'Age (optional)',
                     obsecure: false,
                   ),
                   FormFields(
@@ -132,23 +132,28 @@ class RegisterPageState extends State<RegisterPage> {
                   SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        if (password.text != confirmPassword.text) {
-                          Fluttertoast.showToast(
-                            msg: "Passwords do not match",
-                            textColor: Colors.red,
-                          );
-                          return;
-                        }
-                        doRegister(
-                          username.text,
-                          email.text,
-                          password.text,
-                          phone.text,
-                          dob.text,
-                          address.text,
+                      if (email.text.isEmpty || username.text.isEmpty || password.text.isEmpty || confirmPassword.text.isEmpty) {
+                        Fluttertoast.showToast(
+                          msg: "Please fill in all required fields",
+                          textColor: Colors.red,
                         );
+                        return;
                       }
+                      if (password.text != confirmPassword.text) {
+                        Fluttertoast.showToast(
+                          msg: "Passwords do not match",
+                          textColor: Colors.red,
+                        );
+                        return;
+                      }
+                      doRegister(
+                        username.text,
+                        email.text,
+                        password.text,
+                        phone.text,
+                        dob.text,
+                        address.text,
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
@@ -231,24 +236,69 @@ class RegisterPageState extends State<RegisterPage> {
     if (res['success']) { // nếu đăng ký thành công
       // Save username and body information to SharedPreferences
       await _sharedPreferences.setString('username', username);
-      await _sharedPreferences.setDouble('height', double.parse(height.text));
-      await _sharedPreferences.setDouble('weight', double.parse(weight.text));
-      await _sharedPreferences.setInt('age', int.parse(age.text));
-      
+      if (height.text.isNotEmpty) await _sharedPreferences.setDouble('height', double.tryParse(height.text) ?? 0.0);
+      if (weight.text.isNotEmpty) await _sharedPreferences.setDouble('weight', double.tryParse(weight.text) ?? 0.0);
+      if (age.text.isNotEmpty) await _sharedPreferences.setInt('age', int.tryParse(age.text) ?? 0);
       // Lưu thông tin đăng nhập nếu API trả về user data
       if (res['user'] != null) {
         await _sharedPreferences.setInt('userid', res['user']['id']);
         await _sharedPreferences.setString('usermail', email);
         await _sharedPreferences.setBool('isLoggedIn', true);
       }
-      
-      Fluttertoast.showToast(msg: 'Registration successful', textColor: Colors.green);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => LoginPage()),
+      // Hiển thị màn hình thông báo thành công
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => SuccessDialog(),
       );
     } else {
       Fluttertoast.showToast(msg: 'Registration failed, try again', textColor: Colors.red);
     }
+  }
+}
+
+// Thêm widget SuccessDialog ở cuối file
+class SuccessDialog extends StatefulWidget {
+  @override
+  State<SuccessDialog> createState() => _SuccessDialogState();
+}
+
+class _SuccessDialogState extends State<SuccessDialog> {
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(seconds: 2), () {
+      Navigator.of(context).pop();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => LoginPage()),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      contentPadding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.check_circle_rounded, color: Colors.green, size: 60),
+          const SizedBox(height: 16),
+          Text(
+            'Registration Successful!',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green[800]),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Your account has been created.\nRedirecting to login...',
+            style: TextStyle(fontSize: 16, color: Colors.black87),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
   }
 }

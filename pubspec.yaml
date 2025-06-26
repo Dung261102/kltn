@@ -89,7 +89,8 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/icon/app_icon.png"  # Đường dẫn đến ảnh icon của bạn
+  image_path: "assets/icon/app_icon.png"
+  # Đường dẫn đến ảnh icon của bạn
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -110,9 +111,8 @@ flutter:
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
   assets:
-    - assets/icon/app_icon.png
-    - assets/images/logo.png
-    - assets/images/profile/avatar.jpg
+    - assets/icon/app_icon.jpg
+    - assets/images/profile/avatar.png
 
 
   # For details regarding adding assets from package dependencies, see

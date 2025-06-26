@@ -204,12 +204,39 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-
-
   // Hàm gọi khi người dùng xoá thiết bị - xử lý sau
   void _onClearDevicePressed() {
-
     // TODO: Gắn kết logic xoá thiết bị đã lưu
+  }
+
+  // Hàm kiểm tra và xoá tài khoản đã lưu ở local
+  Future<void> checkAndDeleteLocalAccount() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('userid');
+    final userMail = prefs.getString('usermail');
+    if (userId != null || userMail != null) {
+      // Nếu có tài khoản, tiến hành xoá
+      await prefs.remove('userid');
+      await prefs.remove('usermail');
+      await prefs.remove('username');
+      await prefs.remove('isLoggedIn');
+      await prefs.remove('height');
+      await prefs.remove('weight');
+      await prefs.remove('age');
+      await prefs.remove('avatar');
+      await prefs.remove('avatar_base64');
+      Fluttertoast.showToast(
+        msg: 'Đã xoá tài khoản local thành công!',
+        textColor: Colors.green,
+      );
+      // Chuyển về màn hình đăng nhập
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+    } else {
+      Fluttertoast.showToast(
+        msg: 'Không có tài khoản local nào để xoá!',
+        textColor: Colors.orange,
+      );
+    }
   }
 
   @override
@@ -403,6 +430,41 @@ class _ProfilePageState extends State<ProfilePage> {
           icon: LineAwesomeIcons.question_circle,
           onPress: () {},
         ),
+        
+  //hàm xoá 
+        ProfileMenuWidget(
+          title: 'Xoá tài khoản local',
+          icon: LineAwesomeIcons.trash_alt_solid,
+          textColor: Colors.red,
+          onPress: () async {
+            bool? confirm = await showDialog<bool>(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Xoá tài khoản local'),
+                  content: Text('Bạn có chắc chắn muốn xoá tài khoản local khỏi thiết bị?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: Text('Huỷ'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: Text('Xoá'),
+                      style: TextButton.styleFrom(foregroundColor: Colors.red),
+                    ),
+                  ],
+                );
+              },
+            );
+            if (confirm == true) {
+              await checkAndDeleteLocalAccount();
+            }
+          },
+        ),
+
+        //hàm xoá 
+
         ProfileMenuWidget(
           title: 'Logout',
           icon: LineAwesomeIcons.sign_out_alt_solid,

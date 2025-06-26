@@ -99,6 +99,13 @@ class _LoginPageState extends State<LoginPage> {
                       _emailController.text = selection;
                     },
                     fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
+                      // Luôn đồng bộ controller của Autocomplete với _emailController
+                      controller.text = _emailController.text;
+                      controller.addListener(() {
+                        if (controller.text != _emailController.text) {
+                          _emailController.text = controller.text;
+                        }
+                      });
                       return FormFields(
                         controller: controller,
                         focusNode: focusNode,
@@ -189,6 +196,8 @@ class _LoginPageState extends State<LoginPage> {
                   // Nút đăng nhập
                   ElevatedButton(
                     onPressed: () {
+                      print('Email: "[32m"+_emailController.text+"\u001b[0m"');
+                      print('Password: "[32m"+_passwordController.text+"\u001b[0m"');
                       if (_emailController.text.isNotEmpty &&
                           _passwordController.text.isNotEmpty) {
                         doLogin(_emailController.text, _passwordController.text);
