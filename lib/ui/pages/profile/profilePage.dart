@@ -430,38 +430,38 @@ class _ProfilePageState extends State<ProfilePage> {
           icon: LineAwesomeIcons.question_circle,
           onPress: () {},
         ),
-        
+
   //hàm xoá 
-        ProfileMenuWidget(
-          title: 'Xoá tài khoản local',
-          icon: LineAwesomeIcons.trash_alt_solid,
-          textColor: Colors.red,
-          onPress: () async {
-            bool? confirm = await showDialog<bool>(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: Text('Xoá tài khoản local'),
-                  content: Text('Bạn có chắc chắn muốn xoá tài khoản local khỏi thiết bị?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      child: Text('Huỷ'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(true),
-                      child: Text('Xoá'),
-                      style: TextButton.styleFrom(foregroundColor: Colors.red),
-                    ),
-                  ],
-                );
-              },
-            );
-            if (confirm == true) {
-              await checkAndDeleteLocalAccount();
-            }
-          },
-        ),
+        // ProfileMenuWidget(
+        //   title: 'Xoá tài khoản local',
+        //   icon: LineAwesomeIcons.trash_alt_solid,
+        //   textColor: Colors.red,
+        //   onPress: () async {
+        //     bool? confirm = await showDialog<bool>(
+        //       context: context,
+        //       builder: (BuildContext context) {
+        //         return AlertDialog(
+        //           title: Text('Xoá tài khoản local'),
+        //           content: Text('Bạn có chắc chắn muốn xoá tài khoản local khỏi thiết bị?'),
+        //           actions: [
+        //             TextButton(
+        //               onPressed: () => Navigator.of(context).pop(false),
+        //               child: Text('Huỷ'),
+        //             ),
+        //             TextButton(
+        //               onPressed: () => Navigator.of(context).pop(true),
+        //               child: Text('Xoá'),
+        //               style: TextButton.styleFrom(foregroundColor: Colors.red),
+        //             ),
+        //           ],
+        //         );
+        //       },
+        //     );
+        //     if (confirm == true) {
+        //       await checkAndDeleteLocalAccount();
+        //     }
+        //   },
+        // ),
 
         //hàm xoá 
 

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -34,7 +33,10 @@ class _MainPageState extends State<MainPage> {
       // backgroundColor: const Color(0xff00278C),
       backgroundColor: context.theme.scaffoldBackgroundColor,
 
-      body: pages[pageIndex],
+      body: IndexedStack(
+        index: pageIndex,
+        children: pages,
+      ),
       bottomNavigationBar: buildMyNavBar(context),
     );
   }

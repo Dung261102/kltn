@@ -1,6 +1,6 @@
-
 import 'package:socket_io_client_flutter/socket_io_client_flutter.dart' as IO;
 import 'package:socket_io_common/src/util/event_emitter.dart';
+import 'package:glucose_real_time/ui/theme/test/utils.dart';
 
 class SocketService {
   static final SocketService _instance = SocketService._internal();
@@ -10,8 +10,8 @@ class SocketService {
   late IO.Socket _socket;
   bool _isConnected = false;
 
-  // Thay đổi URL backend cho phù hợp
-  final String _baseUrl = 'http://localhost:3000';
+  // Lấy baseUrl từ file Utils cho đồng bộ
+  final String _baseUrl = Utils.baseUrl;
 
   // Kết nối tới Socket.IO server
   void connect({Function? onConnect, Function? onDisconnect, Function(dynamic)? onError}) {
