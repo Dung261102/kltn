@@ -8,6 +8,7 @@ import 'package:intl/intl.dart'; // Định dạng thời gian
 // Các tài nguyên theme và model
 import '../../../models/task.dart'; // Model Task
 import '../../theme/theme.dart'; // Theme chung
+import 'package:glucose_real_time/ui/theme/theme.dart';
 
 // Widget chính cho màn hình thêm task
 class AddTaskPage extends StatefulWidget {
@@ -43,24 +44,38 @@ class _AddTaskPageState extends State<AddTaskPage> {
     // UI chính của trang AddTask
     return Scaffold(
       appBar: _appBar(context), // App bar tùy chỉnh
-
+      // body: Container(
+      //   padding: const EdgeInsets.only(left: 20, right: 20),
       body: Container(
-        padding: const EdgeInsets.only(left: 20, right: 20),
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blueAccent, Colors.white],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+
         child: SingleChildScrollView(
+          padding: EdgeInsets.all(25),
           child: Column(
             children: [
-              Text("Add Task", style: headingStyle), // Tiêu đề
+              Text("Add Task", style: headingStyle.copyWith(color: Colors.white)), // Tiêu đề
 
               // Các input field cho title và note
               MyInputField(
                 title: "Title",
                 hint: "Enter your title",
                 controller: _titleController,
+                titleTextStyle: titleStyle.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
+                hintTextStyle: subTitleStyle.copyWith(color: Colors.grey[700]),
               ),
               MyInputField(
                 title: "Note",
                 hint: "Enter your note",
                 controller: _noteController,
+                titleTextStyle: titleStyle.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
+                hintTextStyle: subTitleStyle.copyWith(color: Colors.grey[700]),
               ),
 
               // Chọn ngày
@@ -68,12 +83,13 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 title: "Date",
                 hint: DateFormat.yMd().format(_selectedDate),
                 widget: IconButton(
-                  icon: Icon(Icons.calendar_today_outlined),
-                  color: Colors.grey,
+                  icon: Icon(Icons.calendar_today_outlined, color: primaryClr),
                   onPressed: () {
                     _getDateFromUser();
                   },
                 ),
+                titleTextStyle: titleStyle.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
+                hintTextStyle: subTitleStyle.copyWith(color: Colors.grey[700]),
               ),
 
               // Chọn giờ bắt đầu và kết thúc
@@ -87,8 +103,10 @@ class _AddTaskPageState extends State<AddTaskPage> {
                         onPressed: () {
                           _getTimeFromUser(isStartTime: true);
                         },
-                        icon: Icon(Icons.access_time_rounded, color: Colors.grey),
+                        icon: Icon(Icons.access_time_rounded, color: primaryClr),
                       ),
+                      titleTextStyle: titleStyle.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
+                      hintTextStyle: subTitleStyle.copyWith(color: Colors.grey[700]),
                     ),
                   ),
                   SizedBox(width: 12),
@@ -100,8 +118,10 @@ class _AddTaskPageState extends State<AddTaskPage> {
                         onPressed: () {
                           _getTimeFromUser(isStartTime: false);
                         },
-                        icon: Icon(Icons.access_time_rounded, color: Colors.grey),
+                        icon: Icon(Icons.access_time_rounded, color: primaryClr),
                       ),
+                      titleTextStyle: titleStyle.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
+                      hintTextStyle: subTitleStyle.copyWith(color: Colors.grey[700]),
                     ),
                   ),
                 ],
@@ -112,7 +132,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 title: "Remind",
                 hint: "$_selectedRemind minutes early",
                 widget: DropdownButton(
-                  icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey),
+                  icon: Icon(Icons.keyboard_arrow_down, color: primaryClr),
                   iconSize: 32,
                   elevation: 4,
                   style: subTitleStyle,
@@ -129,6 +149,8 @@ class _AddTaskPageState extends State<AddTaskPage> {
                     );
                   }).toList(),
                 ),
+                titleTextStyle: titleStyle.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
+                hintTextStyle: subTitleStyle.copyWith(color: Colors.grey[700]),
               ),
 
               // Dropdown chọn chế độ lặp lại
@@ -136,7 +158,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 title: "Repeat",
                 hint: _selectedRepeat,
                 widget: DropdownButton(
-                  icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey),
+                  icon: Icon(Icons.keyboard_arrow_down, color: primaryClr),
                   iconSize: 32,
                   elevation: 4,
                   style: subTitleStyle,
@@ -149,10 +171,12 @@ class _AddTaskPageState extends State<AddTaskPage> {
                   items: repeatList.map<DropdownMenuItem<String>>((String? value) {
                     return DropdownMenuItem<String>(
                       value: value,
-                      child: Text(value!, style: TextStyle(color: Colors.grey)),
+                      child: Text(value!),
                     );
                   }).toList(),
                 ),
+                titleTextStyle: titleStyle.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
+                hintTextStyle: subTitleStyle.copyWith(color: Colors.grey[700]),
               ),
 
               SizedBox(height: 18),
@@ -213,7 +237,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Color", style: titleStyle),
+        Text("Color", style: titleStyle.copyWith(color: Colors.black, fontWeight: FontWeight.bold)),
         SizedBox(height: 8.0),
         Wrap(
           children: List<Widget>.generate(3, (int index) {

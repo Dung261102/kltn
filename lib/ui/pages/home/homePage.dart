@@ -61,6 +61,7 @@ class _HomePageState extends State<HomePage> {
     socketService.on('Glucose_SensorData', (data) {
       print('[SOCKET RECEIVED] → Glucose_SensorData: $data');
       if (data != null && data['value'] is int) {
+        if (!mounted) return;
         setState(() {
           currentGlucose = data['value'];
           final record = (time: DateTime.now(), value: currentGlucose);
@@ -77,6 +78,7 @@ class _HomePageState extends State<HomePage> {
     socketService.on('Glucose_History', (data) {
       print('[SOCKET RECEIVED] → Glucose_History: $data');
       if (data is List) {
+        if (!mounted) return;
         setState(() {
           final List<GlucoseRecord> list = [];
           for (var item in data) {
@@ -105,6 +107,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _loadUserName() async {
     final prefs = await SharedPreferences.getInstance();
     final name = prefs.getString('username') ?? "User";
+    if (!mounted) return;
     userController.setUsername(name);
   }
 
@@ -113,10 +116,13 @@ class _HomePageState extends State<HomePage> {
     final savedAvatar = prefs.getString('avatar');
     final base64Str = prefs.getString('avatar_base64');
     if (base64Str != null && base64Str.isNotEmpty) {
+      if (!mounted) return;
       userController.setAvatarBytes(base64Decode(base64Str));
     } else if (savedAvatar != null && savedAvatar.isNotEmpty) {
+      if (!mounted) return;
       userController.setAvatarPath(savedAvatar);
     } else {
+      if (!mounted) return;
       userController.setAvatarPath("assets/images/profile/avatar.jpg");
     }
   }
@@ -152,69 +158,68 @@ class _HomePageState extends State<HomePage> {
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
         )),
       ),
-      body: Builder(
-        builder: (context) {
-          final device = bleController.connectedDevice.value;
-          final isConnected = device != null;
-          // Ưu tiên dữ liệu từ GlucoseController
-          final glucoseHistory = glucoseController.glucoseHistory;
-          if (glucoseHistory.isNotEmpty) {
-            return ListView(
-              children: [
-                GlucoseLineChartSection(
-                  data: glucoseHistory,
-                  title: null,
-                  showMetrics: false,
-                ),
-                _buildGlucoseDisplay(glucoseHistory.last.value, isConnected, device?.name ?? '', glucoseHistory.last.time),
-                _buildHistoryList(glucoseHistory),
-              ],
-            );
-          }
-          // Nếu chưa có dữ liệu WebSocket, kiểm tra BLE
-          final bleHistory = bleController.glucoseHistory;
-          if (!isConnected) {
-            return Center(
-              child: Text(
-                'No real-time data yet. Please connect to a BLE device to get glucose data.',
-                style: subTitleStyle,
-                textAlign: TextAlign.center,
-              ),
-            );
-          }
-          // Nếu đã kết nối BLE, hiển thị dữ liệu từ BLE
-          // Lấy 10 điểm cuối cùng
-          final last10 = bleHistory.length > 10 ? bleHistory.sublist(bleHistory.length - 10) : bleHistory;
-          final chartTimes = last10.map((e) => e.time).toList();
+      body: Obx(() {
+        final device = bleController.connectedDevice.value;
+        final isConnected = device != null;
+        // Ưu tiên dữ liệu từ GlucoseController
+        final glucoseHistory = glucoseController.glucoseHistory;
+        if (glucoseHistory.isNotEmpty) {
           return ListView(
             children: [
               GlucoseLineChartSection(
-                data: bleHistory,
+                data: glucoseHistory,
                 title: null,
                 showMetrics: false,
               ),
-              _buildGlucoseDisplay(bleHistory.isNotEmpty ? bleHistory.last.value : 0, isConnected, device?.name ?? '', bleHistory.isNotEmpty ? bleHistory.last.time : DateTime.now()),
-              // Chỉ Obx cho nút đo glucose
-              Obx(() => ElevatedButton.icon(
-                onPressed: isMeasuring.value ? null : () async {
-                  isMeasuring.value = true;
-                  await bleController.doMeasureGlucose();
-                  isMeasuring.value = false;
-                },
-                icon: isMeasuring.value
-                    ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : Icon(Icons.bloodtype),
-                label: Text(isMeasuring.value ? 'Measuring...' : 'Measure Glucose'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-              )),
-              _buildHistoryList(bleHistory),
+              _buildGlucoseDisplay(glucoseHistory.last.value, isConnected, device?.name ?? '', glucoseHistory.last.time),
+              _buildHistoryList(glucoseHistory),
             ],
           );
-        },
-      ),
+        }
+        // Nếu chưa có dữ liệu WebSocket, kiểm tra BLE
+        if (!isConnected) {
+          return Center(
+            child: Text(
+              'No real-time data yet. Please connect to a BLE device to get glucose data.',
+              style: subTitleStyle,
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
+        // Nếu đã kết nối BLE, hiển thị dữ liệu từ BLE
+        return ListView(
+          children: [
+            Obx(() => GlucoseLineChartSection(
+              data: bleController.glucoseHistory,
+              title: null,
+              showMetrics: false,
+            )),
+            Obx(() => _buildGlucoseDisplay(
+              bleController.glucoseHistory.isNotEmpty ? bleController.glucoseHistory.last.value : 0, 
+              isConnected, 
+              device?.name ?? '', 
+              bleController.glucoseHistory.isNotEmpty ? bleController.glucoseHistory.last.time : DateTime.now()
+            )),
+            // Chỉ Obx cho nút đo glucose
+            Obx(() => ElevatedButton.icon(
+              onPressed: isMeasuring.value ? null : () async {
+                isMeasuring.value = true;
+                await bleController.doMeasureGlucose();
+                isMeasuring.value = false;
+              },
+              icon: isMeasuring.value
+                  ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : Icon(Icons.bloodtype),
+              label: Text(isMeasuring.value ? 'Measuring...' : 'Measure Glucose'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal,
+                minimumSize: const Size(double.infinity, 50),
+              ),
+            )),
+            Obx(() => _buildHistoryList(bleController.glucoseHistory)),
+          ],
+        );
+      }),
     );
   }
 
@@ -310,7 +315,7 @@ class _HomePageState extends State<HomePage> {
                           const Icon(Icons.access_time, size: 16, color: Colors.orange),
                           const SizedBox(width: 4),
                           //thời gian đo
-                          Text('Measured at \\${_formatTime(measuredTime)}', style: const TextStyle(fontSize: 13, color: Colors.black54, fontStyle: FontStyle.italic)),
+                          Text('Measured at ${_formatTime(measuredTime)}', style: const TextStyle(fontSize: 13, color: Colors.black87, fontStyle: FontStyle.italic)),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -330,11 +335,17 @@ class _HomePageState extends State<HomePage> {
                         ),
                         const SizedBox(height: 25),
                         //thông báo kết nối
-                        Text(
-                          isConnected ? 'Connected: $deviceName' : 'Not connected to device',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: isConnected ? Colors.grey[600] : Colors.red[300],
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Text(
+                            isConnected ? 'Connected: $deviceName' : 'Not connected to device',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: isConnected ? Colors.black87 : Colors.red[600],
+                            ),
+                            maxLines: 1,
+                            softWrap: false,
                           ),
                         ),
                       ],

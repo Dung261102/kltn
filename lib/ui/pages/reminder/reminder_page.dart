@@ -31,6 +31,7 @@ class _ReminderPageState extends State<ReminderPage> {
   @override
   void initState() {
     super.initState();
+    _taskController.getTask(); // Luôn load lại danh sách task khi vào ReminderPage
   }
 
   @override
@@ -65,10 +66,10 @@ class _ReminderPageState extends State<ReminderPage> {
               children: [
                 Text(
                   DateFormat.yMMMMd().format(DateTime.now()),
-                  style: subHeadingStyle,
+                  style: subHeadingStyle.copyWith(color: Colors.grey[700], fontStyle: FontStyle.italic),
                 ),
 
-                Text("Today", style: headingStyle),
+                Text("Today", style: headingStyle.copyWith(color: primaryClr, fontWeight: FontWeight.bold, fontSize: 32)),
               ],
             ),
           ),
@@ -94,14 +95,14 @@ class _ReminderPageState extends State<ReminderPage> {
         width: 80,
 
         initialSelectedDate: DateTime.now(),
-        selectionColor: primaryClr,
+        selectionColor: Colors.deepOrangeAccent,
         selectedTextColor: Colors.white,
 
         dateTextStyle: GoogleFonts.lato(
           textStyle: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            color: Colors.grey,
+            color: Colors.grey[700],
           ),
         ),
 
@@ -109,7 +110,7 @@ class _ReminderPageState extends State<ReminderPage> {
           textStyle: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: Colors.grey,
+            color: Colors.grey[700],
           ),
         ),
 
@@ -117,7 +118,7 @@ class _ReminderPageState extends State<ReminderPage> {
           textStyle: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Colors.grey,
+            color: Colors.grey[700],
           ),
         ),
 
@@ -133,6 +134,21 @@ class _ReminderPageState extends State<ReminderPage> {
   _showTask() {
     return Expanded(
       child: Obx(() {
+        if (_taskController.taskList.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.inbox, size: 80, color: Colors.grey[300]),
+                SizedBox(height: 16),
+                Text(
+                  "No tasks yet",
+                  style: TextStyle(color: Colors.grey[400], fontSize: 20, fontStyle: FontStyle.italic),
+                ),
+              ],
+            ),
+          );
+        }
         return ListView.builder(
           itemCount: _taskController.taskList.length,
           itemBuilder: (_, index) {
@@ -341,3 +357,6 @@ class _ReminderPageState extends State<ReminderPage> {
 
 
 }
+
+
+

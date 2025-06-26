@@ -9,6 +9,8 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:convert';
 import 'dart:typed_data';
 
+const Color profileBlue = Color(0xFF4e5ae8); // Xanh dương dịu cho profile
+
 class UpdateProfileController extends GetxController {
   final nameController = TextEditingController();
   final heightController = TextEditingController();
@@ -33,14 +35,9 @@ class UpdateProfileController extends GetxController {
       if (kIsWeb) {
         final bytes = await picked.readAsBytes();
         avatarBytes.value = bytes;
-        final base64Str = base64Encode(bytes);
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('avatar_base64', base64Str);
         avatarPath.value = '';
       } else {
         avatarPath.value = picked.path;
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('avatar', picked.path);
       }
     }
   }
@@ -120,24 +117,36 @@ class UpdateProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(UpdateProfileController());
-    // Lấy avatar từ SharedPreferences nếu có
-    SharedPreferences.getInstance().then((prefs) {
-      final savedAvatar = prefs.getString('avatar');
-      if (savedAvatar != null && savedAvatar.isNotEmpty) {
-        controller.avatarPath.value = savedAvatar;
-      }
-    });
+    // Lấy avatar từ SharedPreferences nếu có, chỉ khi controller chưa có avatar tạm thời
+    if (controller.avatarPath.value.isEmpty && controller.avatarBytes.value == null) {
+      SharedPreferences.getInstance().then((prefs) {
+        final savedAvatar = prefs.getString('avatar');
+        if (savedAvatar != null && savedAvatar.isNotEmpty) {
+          controller.avatarPath.value = savedAvatar;
+        }
+      });
+    }
     return Scaffold(
       appBar: _buildAppBar(),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(25),
-        child: Column(
-          children: [
-            _buildAvatar(controller),
-            const SizedBox(height: 50),
-            _buildProfileForm(controller),
-            const SizedBox(height: 20),
-          ],
+      body: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFB2C6FF), Colors.white],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(25),
+          child: Column(
+            children: [
+              _buildAvatar(controller),
+              const SizedBox(height: 50),
+              _buildProfileForm(controller),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
@@ -150,11 +159,16 @@ class UpdateProfileScreen extends StatelessWidget {
         SizedBox(
           width: 120,
           height: 120,
-          child: ClipRRect(
-            borderRadius: const BorderRadius.all(Radius.circular(100)),
-            child: kIsWeb
-                ? _buildWebAvatar(controller)
-                : _buildMobileAvatar(controller),
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: profileBlue, width: 3),
+            ),
+            child: ClipOval(
+              child: kIsWeb
+                  ? _buildWebAvatar(controller)
+                  : _buildMobileAvatar(controller),
+            ),
           ),
         ),
         Positioned(
@@ -165,14 +179,15 @@ class UpdateProfileScreen extends StatelessWidget {
             child: Container(
               width: 40,
               height: 40,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
+                border: Border.all(color: profileBlue, width: 1.5),
               ),
-              child: const Icon(
+              child: Icon(
                 LineAwesomeIcons.camera_solid,
                 size: 18,
-                color: Colors.grey,
+                color: Colors.black,
               ),
             ),
           ),
@@ -225,8 +240,9 @@ class UpdateProfileScreen extends StatelessWidget {
           TextFormField(
             controller: controller.nameController,
             decoration: const InputDecoration(
-              labelText: 'Full Name',
-              prefixIcon: Icon(LineAwesomeIcons.user),
+              labelText: 'User Name',
+              labelStyle: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+              prefixIcon: Icon(LineAwesomeIcons.user, color: Colors.black87),
             ),
           ),
           const SizedBox(height: 20),
@@ -235,7 +251,8 @@ class UpdateProfileScreen extends StatelessWidget {
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
               labelText: 'Height (cm)',
-              prefixIcon: Icon(LineAwesomeIcons.arrow_alt_circle_up),
+              labelStyle: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+              prefixIcon: Icon(LineAwesomeIcons.arrow_alt_circle_up, color: Colors.black87),
             ),
           ),
           const SizedBox(height: 20),
@@ -244,7 +261,8 @@ class UpdateProfileScreen extends StatelessWidget {
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
               labelText: 'Weight (kg)',
-              prefixIcon: Icon(LineAwesomeIcons.chart_bar),
+              labelStyle: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+              prefixIcon: Icon(LineAwesomeIcons.chart_bar, color: Colors.black87),
             ),
           ),
           const SizedBox(height: 20),
@@ -253,7 +271,8 @@ class UpdateProfileScreen extends StatelessWidget {
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
               labelText: 'Age',
-              prefixIcon: Icon(LineAwesomeIcons.calendar),
+              labelStyle: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+              prefixIcon: Icon(LineAwesomeIcons.calendar, color: Colors.black87),
             ),
           ),
           const SizedBox(height: 20),

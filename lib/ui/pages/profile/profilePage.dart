@@ -244,19 +244,30 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       appBar: CommonAppBar(
         notifyHelper: notifyHelper,
+        title: 'Profile',
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(25, 10, 25, 25),
-        child: Column(
-          children: [
-            _buildProfileHeader(),             // Bấm avatar sẽ điều hướng đến chỉnh sửa
-            const SizedBox(height: 15),
-            _buildDeviceInfo(),                // UI thêm thiết bị và thông tin thiết bị
-            const SizedBox(height: 30),
-            const Divider(),
-            const SizedBox(height: 10),
-            _buildMenuOptions(),               // Danh sách chức năng khác
-          ],
+      body: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFB2C6FF), Colors.white],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(25, 10, 25, 25),
+          child: Column(
+            children: [
+              _buildProfileHeader(),             // Bấm avatar sẽ điều hướng đến chỉnh sửa
+              const SizedBox(height: 15),
+              _buildDeviceInfo(),                // UI thêm thiết bị và thông tin thiết bị
+              const SizedBox(height: 30),
+              const Divider(),
+              const SizedBox(height: 10),
+              _buildMenuOptions(),               // Danh sách chức năng khác
+            ],
+          ),
         ),
       ),
     );
@@ -297,23 +308,23 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildProfileHeader() {
     return Column(
       children: [
-        Text(
-          "My Profile",
-          style: headingStyle,
-        ),
-        const SizedBox(height: 4),
         Stack(
           children: [
             SizedBox(
               width: 120,
               height: 120,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(100),
-                child: avatarBytes != null
-                    ? Image.memory(avatarBytes!, fit: BoxFit.cover)
-                    : (avatarPath.startsWith('/')
-                    ? Image.file(File(avatarPath), fit: BoxFit.cover)
-                    : Image.asset(avatarPath)),
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: primaryClr, width: 3),
+                ),
+                child: ClipOval(
+                  child: avatarBytes != null
+                      ? Image.memory(avatarBytes!, fit: BoxFit.cover, width: 114, height: 114)
+                      : (avatarPath.startsWith('/')
+                          ? Image.file(File(avatarPath), fit: BoxFit.cover, width: 114, height: 114)
+                          : Image.asset(avatarPath, fit: BoxFit.cover, width: 114, height: 114)),
+                ),
               ),
             ),
             Positioned(
@@ -355,11 +366,12 @@ class _ProfilePageState extends State<ProfilePage> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(100),
                     color: Colors.white,
+                    border: Border.all(color: primaryClr, width: 1.5),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     LineAwesomeIcons.pen_fancy_solid,
                     size: 18,
-                    color: Colors.grey,
+                    color: Colors.black,
                   ),
                 ),
               ),
@@ -369,7 +381,7 @@ class _ProfilePageState extends State<ProfilePage> {
         const SizedBox(height: 2),
         Text(
           userName,
-          style: headingStyle,
+          style: headingStyle.copyWith(color: Colors.black87, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 10),
         Row(
@@ -378,23 +390,23 @@ class _ProfilePageState extends State<ProfilePage> {
             MyButton(
               label: "${height} cm\nHeight",
               onTap: () {},
-              color: white,
-              valueStyle: titleStyle,
-              labelStyle: subTitleStyle,
+              color: Colors.white,
+              valueStyle: titleStyle.copyWith(color: primaryClr, fontWeight: FontWeight.bold),
+              labelStyle: subTitleStyle.copyWith(color: Colors.black54),
             ),
             MyButton(
               label: "${weight} kg\nWeight",
               onTap: () {},
-              color: white,
-              valueStyle: titleStyle,
-              labelStyle: subTitleStyle,
+              color: Colors.white,
+              valueStyle: titleStyle.copyWith(color: primaryClr, fontWeight: FontWeight.bold),
+              labelStyle: subTitleStyle.copyWith(color: Colors.black54),
             ),
             MyButton(
               label: "${age} years\nAge",
               onTap: () {},
-              color: white,
-              valueStyle: titleStyle,
-              labelStyle: subTitleStyle,
+              color: Colors.white,
+              valueStyle: titleStyle.copyWith(color: primaryClr, fontWeight: FontWeight.bold),
+              labelStyle: subTitleStyle.copyWith(color: Colors.black54),
             ),
           ],
         ),
@@ -410,6 +422,7 @@ class _ProfilePageState extends State<ProfilePage> {
           title: 'Settings',
           icon: LineAwesomeIcons.cog_solid,
           onPress: () {},
+          textColor: Colors.black87,
         ),
         ProfileMenuWidget(
           title: 'Profile',
@@ -417,11 +430,13 @@ class _ProfilePageState extends State<ProfilePage> {
           onPress: () {
             Get.to(() => ViewProfileScreen());
           },
+          textColor: Colors.black87,
         ),
         ProfileMenuWidget(
           title: 'Privacy Policy',
           icon: LineAwesomeIcons.key_solid,
           onPress: () {},
+          textColor: Colors.black87,
         ),
         const Divider(color: Colors.black),
         const SizedBox(height: 10),
@@ -429,6 +444,7 @@ class _ProfilePageState extends State<ProfilePage> {
           title: 'Help',
           icon: LineAwesomeIcons.question_circle,
           onPress: () {},
+          textColor: Colors.black87,
         ),
 
   //hàm xoá 

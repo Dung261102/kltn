@@ -50,56 +50,74 @@ class _BleViewState extends State<BleView> {
                       padding: const EdgeInsets.all(12.0),
                       child: Text('Previously Connected Devices:', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
                     ),
-                    ...devices.map((d) => ListTile(
-                      leading: Icon(Icons.bluetooth),
-                      title: Text(d['name'] ?? '', style: TextStyle(color: Colors.blue[900], fontWeight: FontWeight.bold)),
-                      subtitle: Text(d['id'] ?? '', style: TextStyle(color: Colors.white)),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ElevatedButton(
-                            child: Text('Connect', style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold)),
-                            onPressed: () async {
-                              final scanned = controller.scannedDevices.firstWhereOrNull(
-                                (s) => s.device.id.id == d['id'],
-                              );
-                              if (scanned != null) {
-                                await controller.connectToDevice(scanned.device);
-                              } else {
-                                Get.snackbar('Device not found', 'Please turn on the device and scan again.');
-                              }
-                            },
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.delete, color: Colors.red),
-                            tooltip: 'Delete',
-                            onPressed: () async {
-                              final confirm = await showDialog<bool>(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: Text('Delete Device'),
-                                  content: Text('Are you sure you want to delete this device from history?'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop(false),
-                                      child: Text('No'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop(true),
-                                      child: Text('Yes'),
-                                    ),
-                                  ],
-                                ),
-                              );
-                              if (confirm == true) {
-                                await controller.removeConnectedDevice(d['id']!);
-                                setState(() {
-                                  deviceListKey++;
-                                });
-                              }
-                            },
+                    ...devices.map((d) => Container(
+                      margin: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
                           ),
                         ],
+                      ),
+                      child: ListTile(
+                        leading: Icon(Icons.bluetooth),
+                        title: Text(d['name'] ?? '', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
+                        subtitle: Text(d['id'] ?? '', style: TextStyle(color: Colors.black54)),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ElevatedButton(
+                              child: Text('Connect', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                foregroundColor: Colors.white,
+                              ),
+                              onPressed: () async {
+                                final scanned = controller.scannedDevices.firstWhereOrNull(
+                                  (s) => s.device.id.id == d['id'],
+                                );
+                                if (scanned != null) {
+                                  await controller.connectToDevice(scanned.device);
+                                } else {
+                                  Get.snackbar('Device not found', 'Please turn on the device and scan again.');
+                                }
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Colors.red),
+                              tooltip: 'Delete',
+                              onPressed: () async {
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: Text('Delete Device'),
+                                    content: Text('Are you sure you want to delete this device from history?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(false),
+                                        child: Text('No'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(true),
+                                        child: Text('Yes'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (confirm == true) {
+                                  await controller.removeConnectedDevice(d['id']!);
+                                  setState(() {
+                                    deviceListKey++;
+                                  });
+                                }
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     )),
                     Divider(),
@@ -139,6 +157,8 @@ class _BleViewState extends State<BleView> {
                   },
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 24.0),
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
                   ),
                 ),
               ),
@@ -176,11 +196,11 @@ class _BleViewState extends State<BleView> {
                             children: [
                               Text(
                                 device.name.isNotEmpty ? device.name : "No name",
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.blue[900]),
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
                               ),
                               Text(
                                 "ID: ${device.id.id}",
-                                style: TextStyle(fontSize: 12, color: Colors.blueGrey),
+                                style: TextStyle(fontSize: 12, color: Colors.black54),
                               ),
                             ],
                           ),
@@ -218,7 +238,7 @@ class _BleViewState extends State<BleView> {
               final devices = controller.scannedDevices;
 
               if (devices.isEmpty) {
-                return Center(child: Text("⚠️ No devices found"));
+                return Center(child: Text("⚠️ No devices found", style: TextStyle(color: Colors.black87, fontSize: 16)));
               }
 
               return Expanded(
@@ -230,18 +250,26 @@ class _BleViewState extends State<BleView> {
 
                     return Card(
                       margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      elevation: 3,
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      color: Colors.white,
                       child: ListTile(
                         title: Text(
                           device.name.isNotEmpty
                               ? device.name
                               : "No name", // Nếu thiết bị không có tên thì hiển thị thông báo
-                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue[900]),
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
                         ),  
-                        subtitle: Text("ID: ${device.id.id}\nRSSI: ${result.rssi}", style: TextStyle(color: Colors.blueGrey)),
+                        subtitle: Text("ID: ${device.id.id}\nRSSI: ${result.rssi}", style: TextStyle(color: Colors.black54)),
                         isThreeLine: true,
                         trailing: ElevatedButton(
-                          child: Text("Connect", style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold)),
+                          child: Text("Connect", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                          ),
                           onPressed: () async {
                             showServices.value = false; // Ẩn danh sách service cũ nếu có
                             await controller.connectToDevice(device); // Gọi kết nối đến thiết bị được chọn
@@ -271,13 +299,13 @@ class _BleViewState extends State<BleView> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("🧪 Service: ${service.uuid}", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue[900])), //  Service: ${service.uuid}
+                          Text("🧪 Service: ${service.uuid}", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)), //  Service: ${service.uuid}
                           ...service.characteristics.map(
                                 (c) => Padding(
                               padding:
                               const EdgeInsets.only(left: 16.0, top: 4),
                               child: Text(
-                                  "🔹 Characteristic: ${c.uuid} | properties: ${c.properties}", style: TextStyle(color: Colors.blueGrey)),
+                                  "🔹 Characteristic: ${c.uuid} | properties: ${c.properties}", style: TextStyle(color: Colors.black54)),
                             ),
                           ), // Lặp và hiển thị các đặc tính của service    
                           SizedBox(height: 8),

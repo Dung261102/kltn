@@ -127,7 +127,10 @@ class _ReportPageState extends State<ReportPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CommonAppBar(notifyHelper: notifyHelper),
+      appBar: CommonAppBar(
+        notifyHelper: notifyHelper,
+        title: 'Report',
+      ),
       body: Builder(
         builder: (context) {
           return ListView(
@@ -153,7 +156,7 @@ class _ReportPageState extends State<ReportPage> {
                 },
               ),
               _buildTodaySection(),
-              _buildDoctorReports(),
+              // _buildDoctorReports(),
             ],
           );
         },
@@ -735,147 +738,147 @@ class _ReportPageState extends State<ReportPage> {
 //   }
 // }
 
-  Widget _buildDoctorReports() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Icon(Icons.medical_services, color: Colors.blue.shade600,
-                  size: 24),
-              const SizedBox(width: 10),
-              Text("Doctor Reports",
-                  style: headingStyle.copyWith(color: Colors.black)),
-            ],
-          ),
-          const SizedBox(height: 15),
-          _buildReportList(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildReportList() {
-    final List<Map<String, dynamic>> reports = [
-      {
-        "title": "Doctor report on 03/05",
-        "description": "Latest medical consultation summary",
-        "date": "May 3, 2025",
-        "status": "Completed"
-      },
-      {
-        "title": "Doctor report on 02/05",
-        "description": "Follow-up appointment notes",
-        "date": "May 2, 2025",
-        "status": "Completed"
-      },
-      {
-        "title": "Doctor report on 01/05",
-        "description": "Initial consultation report",
-        "date": "May 1, 2025",
-        "status": "Completed"
-      },
-    ];
-
-    return Column(
-      children: reports.map((report) => _buildReportItem(report)).toList(),
-    );
-  }
-
-  Widget _buildReportItem(Map<String, dynamic> report) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.blue.withOpacity(0.2), width: 1),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-                Icons.medical_services, color: Colors.blue.shade600, size: 24),
-          ),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  report["title"],
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  report["description"],
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey.shade600,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Icon(Icons.calendar_today, color: Colors.grey.shade500,
-                        size: 14),
-                    const SizedBox(width: 4),
-                    Text(
-                      report["date"],
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(width: 15),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        report["status"],
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.green.shade700,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Icon(Icons.arrow_forward_ios, color: Colors.grey.shade400, size: 16),
-        ],
-      ),
-    );
-  }
+//   Widget _buildDoctorReports() {
+//     return Container(
+//       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+//       padding: const EdgeInsets.all(20),
+//       decoration: BoxDecoration(
+//         color: Colors.white,
+//         borderRadius: BorderRadius.circular(30),
+//         boxShadow: [
+//           BoxShadow(
+//             color: Colors.grey.withOpacity(0.3),
+//             blurRadius: 10,
+//             offset: const Offset(0, 4),
+//           ),
+//         ],
+//       ),
+//       child: Column(
+//         children: [
+//           Row(
+//             children: [
+//               Icon(Icons.medical_services, color: Colors.blue.shade600,
+//                   size: 24),
+//               const SizedBox(width: 10),
+//               Text("Doctor Reports",
+//                   style: headingStyle.copyWith(color: Colors.black)),
+//             ],
+//           ),
+//           const SizedBox(height: 15),
+//           _buildReportList(),
+//         ],
+//       ),
+//     );
+//   }
+//
+//   Widget _buildReportList() {
+//     final List<Map<String, dynamic>> reports = [
+//       {
+//         "title": "Doctor report on 03/05",
+//         "description": "Latest medical consultation summary",
+//         "date": "May 3, 2025",
+//         "status": "Completed"
+//       },
+//       {
+//         "title": "Doctor report on 02/05",
+//         "description": "Follow-up appointment notes",
+//         "date": "May 2, 2025",
+//         "status": "Completed"
+//       },
+//       {
+//         "title": "Doctor report on 01/05",
+//         "description": "Initial consultation report",
+//         "date": "May 1, 2025",
+//         "status": "Completed"
+//       },
+//     ];
+//
+//     return Column(
+//       children: reports.map((report) => _buildReportItem(report)).toList(),
+//     );
+//   }
+//
+//   Widget _buildReportItem(Map<String, dynamic> report) {
+//     return Container(
+//       margin: const EdgeInsets.symmetric(vertical: 8),
+//       padding: const EdgeInsets.all(16),
+//       decoration: BoxDecoration(
+//         color: Colors.blue.withOpacity(0.08),
+//         borderRadius: BorderRadius.circular(20),
+//         border: Border.all(color: Colors.blue.withOpacity(0.2), width: 1),
+//       ),
+//       child: Row(
+//         children: [
+//           Container(
+//             padding: const EdgeInsets.all(10),
+//             decoration: BoxDecoration(
+//               color: Colors.blue.withOpacity(0.15),
+//               borderRadius: BorderRadius.circular(12),
+//             ),
+//             child: Icon(
+//                 Icons.medical_services, color: Colors.blue.shade600, size: 24),
+//           ),
+//           const SizedBox(width: 15),
+//           Expanded(
+//             child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Text(
+//                   report["title"],
+//                   style: TextStyle(
+//                     fontSize: 16,
+//                     fontWeight: FontWeight.w600,
+//                     color: Colors.black87,
+//                   ),
+//                 ),
+//                 const SizedBox(height: 4),
+//                 Text(
+//                   report["description"],
+//                   style: TextStyle(
+//                     fontSize: 13,
+//                     color: Colors.grey.shade600,
+//                     fontWeight: FontWeight.w400,
+//                   ),
+//                 ),
+//                 const SizedBox(height: 6),
+//                 Row(
+//                   children: [
+//                     Icon(Icons.calendar_today, color: Colors.grey.shade500,
+//                         size: 14),
+//                     const SizedBox(width: 4),
+//                     Text(
+//                       report["date"],
+//                       style: TextStyle(
+//                         fontSize: 12,
+//                         color: Colors.grey.shade600,
+//                         fontWeight: FontWeight.w500,
+//                       ),
+//                     ),
+//                     const SizedBox(width: 15),
+//                     Container(
+//                       padding: const EdgeInsets.symmetric(
+//                           horizontal: 8, vertical: 2),
+//                       decoration: BoxDecoration(
+//                         color: Colors.green.withOpacity(0.15),
+//                         borderRadius: BorderRadius.circular(8),
+//                       ),
+//                       child: Text(
+//                         report["status"],
+//                         style: TextStyle(
+//                           fontSize: 11,
+//                           color: Colors.green.shade700,
+//                           fontWeight: FontWeight.w600,
+//                         ),
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               ],
+//             ),
+//           ),
+//           Icon(Icons.arrow_forward_ios, color: Colors.grey.shade400, size: 16),
+//         ],
+//       ),
+//     );
+//   }
 }

@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-const Color bluishClr = Color(0xFF4e5ae8);
-const Color yellowClr = Color(0xFFFFB746);
-const Color pinkClr = Color(0xFFff4667);
+const Color bluishClr = Color(0xFF6EE7B7); // Mint xanh pastel
+const Color yellowClr = Color(0xFFFFE5B4); // Cam đào nhạt pastel rất dịu
+const Color pinkClr = Color(0xFFB39DDB); // Lavender tím pastel
 const Color white = Colors.white;
 const primaryClr = bluishClr;
 const Color darkGreyClr = Color(0xFF121212);

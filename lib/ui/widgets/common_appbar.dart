@@ -25,6 +25,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       elevation: 0,
       backgroundColor: context.theme.scaffoldBackgroundColor,
+      centerTitle: subtitle == null,
       title: subtitle != null
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,7 +34,17 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
                 subtitle!, // dùng widget luôn
               ],
             )
-          : (title != null ? Text(title!) : null),
+          : (title != null
+              ? Text(
+                  title!,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blueAccent,
+                    letterSpacing: 1.2,
+                  ),
+                )
+              : null),
       leading: showThemeToggle
           ? GestureDetector(
               onTap: () {

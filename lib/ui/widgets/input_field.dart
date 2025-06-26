@@ -14,6 +14,10 @@ class MyInputField extends StatelessWidget {
   final TextEditingController? controller;
   // Widget phụ (có thể là nút chọn ngày, giờ,...)
   final Widget? widget;
+  // Style cho tiêu đề (label)
+  final TextStyle? titleTextStyle;
+  // Style cho hint
+  final TextStyle? hintTextStyle;
 
   // Constructor nhận vào các tham số và đánh dấu bắt buộc cho title và hint
   const MyInputField({
@@ -22,6 +26,8 @@ class MyInputField extends StatelessWidget {
     required this.hint,
     this.controller,
     this.widget,
+    this.titleTextStyle,
+    this.hintTextStyle,
   });
 
   // Phương thức build để tạo UI
@@ -35,7 +41,7 @@ class MyInputField extends StatelessWidget {
           // Hiển thị tiêu đề (label) của ô nhập liệu
           Text(
             title,
-            style: titleStyle, // Sử dụng style đã định nghĩa trong theme
+            style: titleTextStyle ?? titleStyle, // Ưu tiên style truyền vào, nếu không có thì dùng mặc định
           ),
 
           // Widget chứa ô nhập liệu và widget phụ bên cạnh
@@ -44,11 +50,19 @@ class MyInputField extends StatelessWidget {
             padding: EdgeInsets.only(left: 14), // Padding bên trái
             margin: EdgeInsets.only(top: 8.0), // Cách tiêu đề phía trên 8px
             decoration: BoxDecoration(
+              color: Colors.white, // Nền trắng cho ô nhập liệu
               border: Border.all(
-                color: Colors.grey, // Viền màu xám
+                color: Colors.grey.shade200, // Viền màu xám nhạt giống FormFields
                 width: 1.0, // Độ dày viền
               ),
               borderRadius: BorderRadius.circular(12), // Bo góc viền
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.shade100,
+                  blurRadius: 5,
+                  offset: Offset(0, 2),
+                ),
+              ],
             ),
             child: Row(
               children: [
@@ -63,7 +77,7 @@ class MyInputField extends StatelessWidget {
                     style: subTitleStyle, // Style chữ cho nội dung nhập
                     decoration: InputDecoration(
                       hintText: hint, // Gợi ý nhập liệu
-                      hintStyle: subTitleStyle, // Style chữ cho gợi ý
+                      hintStyle: hintTextStyle ?? subTitleStyle, // Ưu tiên style truyền vào, nếu không có thì dùng mặc định
 
                       // Ẩn gạch dưới khi focus vào TextFormField
                       focusedBorder: UnderlineInputBorder(

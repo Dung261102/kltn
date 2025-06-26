@@ -57,6 +57,7 @@ class _LoginPageState extends State<LoginPage> {
             end: Alignment.bottomCenter,
           ),
         ),
+
         child: Center(
           child: SingleChildScrollView(
             padding: EdgeInsets.all(25),
@@ -281,6 +282,7 @@ class _LoginPageState extends State<LoginPage> {
     var res = await userLogin(email.trim(), password.trim());
 
     if (res['success']) {
+      print(res['user'][0]); // Log để kiểm tra các trường trả về
       String userEmail = res['user'][0]['email'];
       int userId = res['user'][0]['id'];
       String username = res['user'][0]['name'] ?? 'User'; // Lấy username từ response
@@ -289,6 +291,13 @@ class _LoginPageState extends State<LoginPage> {
       await _sharedPreferences.setInt('userid', userId);
       await _sharedPreferences.setString('usermail', userEmail);
       await _sharedPreferences.setString('username', username);
+      // Lưu thêm các trường profile nếu có
+      String? phone = res['user'][0]['phone'];
+      String? dob = res['user'][0]['dob'] ?? res['user'][0]['date_of_birth'];
+      String? address = res['user'][0]['address'];
+      if (phone != null && phone.isNotEmpty) await _sharedPreferences.setString('phone', phone);
+      if (dob != null && dob.isNotEmpty) await _sharedPreferences.setString('dob', dob);
+      if (address != null && address.isNotEmpty) await _sharedPreferences.setString('address', address);
       
       // Lưu trạng thái đã đăng nhập
       await _sharedPreferences.setBool('isLoggedIn', true);
