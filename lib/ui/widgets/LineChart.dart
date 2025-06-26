@@ -139,7 +139,35 @@ class GlucoseLineChart extends StatelessWidget {
           padding: const EdgeInsets.all(5), // Padding bên trong biểu đồ
           margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), // Khoảng cách với bên ngoài
           decoration: BoxDecoration(
-            color: Colors.white, // Màu nền trắng
+            color: Colors.white,
+        //    gradient: LinearGradient(
+        //   colors: [
+        //     Color.lerp(Colors.white, Colors.blueAccent, 0.02)!, // Trắng pha xanh, trắng đậm hơn ở trên
+        //     Colors.blueAccent
+        //   ],
+        //   begin: Alignment.topLeft,
+        //   end: Alignment.bottomRight,
+        // ),
+
+        // gradient: LinearGradient(
+        //   colors: [
+        //     Colors.white,           // trắng
+        //     Color(0xFFE3F6FF),      // trắng xanh nhạt hơn nữa
+        //     Colors.white,           // trắng
+        //      Color(0xFFE3F6FF),     // hồng nhạt
+        //     Colors.white,  
+        //     Colors.white,  
+        //     Colors.white,      
+        
+        //     Colors.white,           // trắng
+        //     Color(0xFFE3F6FF),     // hồng nhạt
+        //     Colors.white],         // trắng
+        //   begin: Alignment.topLeft,
+        //   end: Alignment.bottomRight,
+          
+        // ),
+
+            
             borderRadius: BorderRadius.circular(35), // Bo tròn góc
             boxShadow: [
               BoxShadow(

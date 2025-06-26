@@ -224,7 +224,11 @@ class _HomePageState extends State<HomePage> {
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.white,
+          gradient: LinearGradient(
+            colors: [Colors.white, Colors.blueAccent],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
@@ -260,7 +264,7 @@ class _HomePageState extends State<HomePage> {
                       fontFamily: 'Montserrat',
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
-                      color: Colors.greenAccent,
+                      color: Colors.white,
                       letterSpacing: 1.2,
                     ),
                   ),
@@ -348,32 +352,52 @@ class _HomePageState extends State<HomePage> {
   // Sửa lại để nhận history từ controller
   Widget _buildHistoryList(List<({DateTime time, int value})> history) {
     if (history.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.all(20.0),
-        child: Text(
-          'No glucose history yet.',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.grey),
+      return Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            Icon(Icons.history, color: Colors.teal, size: 48),
+            const SizedBox(height: 12),
+            Text(
+              'No glucose history yet.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey[500], fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+          ],
         ),
       );
     }
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
+    return Container(
+      margin: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color.lerp(Colors.white, Colors.blueAccent, 0.02)!, // Trắng pha xanh, trắng đậm hơn ở trên
+            Colors.blueAccent
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.teal.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.timeline, color: Colors.teal, size: 24),
+              Icon(Icons.timeline, color: Colors.teal, size: 24),
               const SizedBox(width: 8),
               Text(
                 'Measurement History',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.teal[700],
-                  letterSpacing: 1.1,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.teal[700]),
               ),
               const Spacer(),
               Container(
@@ -384,47 +408,42 @@ class _HomePageState extends State<HomePage> {
                 ),
                 child: const Text(
                   "Recent",
-                  style: TextStyle(
-                    color: Colors.teal,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.teal, fontWeight: FontWeight.w600, fontSize: 12),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 10),
-          Container(
+          ...history.map((record) => Container(
+            margin: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.teal.withOpacity(0.1),
-                  blurRadius: 5,
-                  offset: const Offset(0, 2),
-                )
+              color: Colors.grey[50],
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.history, color: Colors.orange),
+                
+                const SizedBox(width: 10),
+                Text(
+                  '${record.value} mg/dL',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 16),
+                ),
+                const SizedBox(width: 14),
+                Text(
+                  _formatTime(record.time),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                ),
               ],
             ),
-            child: ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: history.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final record = history[index];
-                return ListTile(
-                  leading: const Icon(Icons.history, color: Colors.teal),
-                  title: Text('${record.value} mg/dL'),
-                  subtitle: Text(_formatTime(record.time)),
-                );
-              },
-            ),
-          ),
+          )),
         ],
       ),
     );
   }
+
+  //hiển thị lịch sử đo
 
   Widget _buildRealtimeGlucoseCard() {
     return Card(
